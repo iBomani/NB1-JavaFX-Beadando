@@ -157,6 +157,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <wsdlUrls>
+                        <wsdlUrl>http://www.mnb.hu/arfolyamok.asmx?wsdl</wsdlUrl>
+                    </wsdlUrls>
+                    <packageName>soapmnb</packageName>
+                    <sourceDestDir>src/main/java</sourceDestDir>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
