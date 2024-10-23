@@ -10,6 +10,7 @@ module com.example.nb1javafx {
     requires org.kordamp.bootstrapfx.core;
     requires com.almasb.fxgl.all;
     requires java.persistence;
+    requires java.sql;
 
     opens com.example.nb1javafx to javafx.fxml;
     exports com.example.nb1javafx;
