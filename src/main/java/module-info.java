@@ -8,8 +8,8 @@ module com.example.nb1javafx {
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires java.persistence;
 
     opens com.example.nb1javafx to javafx.fxml;
     exports com.example.nb1javafx;
