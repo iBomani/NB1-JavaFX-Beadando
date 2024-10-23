@@ -1,16 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.nb1javafx.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.nb1javafx.HelloController">
+    <top>
+        <MenuBar>
+            <menus>
+                <!-- Adatbázis Menü -->
+                <Menu text="Adatbázis">
+                    <items>
+                        <MenuItem text="Olvas" onAction="#olvasItem"/>
+                        <MenuItem text="Olvas2"/>
+                        <MenuItem text="Ír"/>
+                        <MenuItem text="Módosít"/>
+                        <MenuItem text="Töröl"/>
+                    </items>
+                </Menu>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+                <!-- SoapKliens Menü -->
+                <Menu text="SoapKliens">
+                    <items>
+                        <MenuItem text="Letöltés"/>
+                        <MenuItem text="Letöltés2"/>
+                        <MenuItem text="Grafikon"/>
+                    </items>
+                </Menu>
+
+                <!-- Párhuzamos Menü -->
+                <Menu text="Párhuzamos"/>
+
+                <!-- Forex Menü -->
+                <Menu text="Forex">
+                    <items>
+                        <MenuItem text="Számlainformációk"/>
+                        <MenuItem text="Aktuális árak"/>
+                        <MenuItem text="Historikus árak"/>
+                        <MenuItem text="Pozíció nyitás"/>
+                        <MenuItem text="Pozíció zárás"/>
+                        <MenuItem text="Nyitott pozíciók"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+</BorderPane>
