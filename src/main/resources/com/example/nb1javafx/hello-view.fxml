@@ -11,10 +11,12 @@
                 <Menu text="Adatbázis">
                     <items>
                         <MenuItem text="Olvas" onAction="#olvasItem"/>
+
                         <MenuItem text="Olvas2" onAction="#olvas2Item"/>
                         <MenuItem text="Ír" onAction="#irItem"/>
                         <MenuItem text="Módosít" onAction="#modositItem"/>
                         <MenuItem text="Töröl" onAction="#torolItem"/>
+
                     </items>
                 </Menu>
 

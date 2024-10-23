@@ -8,25 +8,25 @@ public class Labdarugo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int Id;
+    public int Id;
     @Column(name = "mezszam")
-    private int Mezszam;
+    public int Mezszam;
     @Column(name = "posztid")
-    private int PosztId;
+    public int PosztId;
     @Column(name = "utonev")
-    private String Utonev;
+    public String Utonev;
     @Column(name = "vezeteknev")
-    private String Vezeteknev;
+    public String Vezeteknev;
     @Column(name = "szulido")
-    private String Szulido;
+    public String Szulido;
     @Column(name = "magyar")
-    private boolean Magyar;
+    public boolean Magyar;
     @Column(name = "kulfoldi")
-    private boolean Kulfoldi;
+    public boolean Kulfoldi;
     @Column(name = "ertek")
-    private int Ertek;
+    public int Ertek;
     @Column(name = "klubid")
-    private int KlubId;
+    public int KlubId;
 
     public Labdarugo(int id, int mezszam, int posztId, String utonev, String vezeteknev, String szulido, boolean magyar, boolean kulfoldi, int ertek, int klubId) {
         Id = id;
@@ -44,6 +44,9 @@ public class Labdarugo {
     public Labdarugo() {
 
     }
+
+
+
 
     public int getId() {
         return Id;

@@ -11,6 +11,7 @@ module com.example.nb1javafx {
     requires com.almasb.fxgl.all;
     requires java.persistence;
     requires java.sql;
+    requires org.hibernate.orm.core;
 
     opens com.example.nb1javafx to javafx.fxml;
     exports com.example.nb1javafx;
