@@ -6,6 +6,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -16,10 +19,23 @@ import soapmnb.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
 import soapmnb.MNBArfolyamServiceSoapImpl;
 
 import javax.xml.ws.soap.SOAPFaultException;
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.paint.Color;
+import javafx.geometry.Insets;
 import java.sql.Statement;
 
 public class HelloController {
@@ -231,20 +247,32 @@ public class HelloController {
     public void parhuzamosItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
 
+        // Create the root layout
         BorderPane root = new BorderPane();
+        VBox vBox = new VBox(15);
+        vBox.setPadding(new Insets(20)); // Add padding around the VBox
 
-        Label label1 = new Label("Label1: Hello Dános!");
-        Label label2 = new Label("Label2: Hello Szele!");
+        // Create labels with styling
+        Label label1 = new Label("Label 1: Hello Dános!");
+        label1.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        label1.setTextFill(Color.DARKBLUE); // Set text color
 
+        Label label2 = new Label("Label 2: Hello Szele!");
+        label2.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        label2.setTextFill(Color.DARKGREEN); // Set text color
+
+        // Create a button with styling
         Button button = new Button("Start!");
+        button.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        button.setStyle("-fx-background-color: lightgray; -fx-padding: 10px;"); // Set background color and padding
 
         button.setOnAction(event -> startUpdatingLabels(label1, label2));
 
-        VBox vBox = new VBox(10, label1, label2, button);
+        // Add components to the VBox
+        vBox.getChildren().addAll(label1, label2, button);
 
+        // Set the scene and show the window
         Scene scene = new Scene(vBox, 600, 400);
-
-
         newWindow.setTitle("3. feladat - Párhuzamos");
         newWindow.setScene(scene);
         newWindow.show();
