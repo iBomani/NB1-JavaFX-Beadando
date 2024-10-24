@@ -37,4 +37,8 @@ public class Klub {
     public Klub() {
 
     }
+
+    public String getNev() {
+        return Csapatnev;
+    }
 }

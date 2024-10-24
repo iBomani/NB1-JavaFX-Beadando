@@ -14,29 +14,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import soapmnb.MNBArfolyamServiceSoap;
-import soapmnb.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
-import soapmnb.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
 import soapmnb.MNBArfolyamServiceSoapImpl;
 
 import javax.xml.ws.soap.SOAPFaultException;
-import java.awt.*;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import java.sql.*;
+
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
 import javafx.geometry.Insets;
-import java.sql.Statement;
 
 public class HelloController {
     @FXML
@@ -98,7 +84,7 @@ public class HelloController {
         // Oszlopok értékekhez kötése
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         mezszamCol.setCellValueFactory(new PropertyValueFactory<>("mezszam"));
-        klubidCol.setCellValueFactory(new PropertyValueFactory<>("klubid"));
+        klubidCol.setCellValueFactory(new PropertyValueFactory<>("klubneve"));
         utonevCol.setCellValueFactory(new PropertyValueFactory<>("utonev"));
         vezeteknevCol.setCellValueFactory(new PropertyValueFactory<>("vezeteknev"));
         szulidoCol.setCellValueFactory(new PropertyValueFactory<>("szulido"));
@@ -106,7 +92,7 @@ public class HelloController {
         kulfoldiCol.setCellValueFactory(new PropertyValueFactory<>("kulfoldi"));
         ertekCol.setCellValueFactory(new PropertyValueFactory<>("ertek"));
 
-        posztIdCol.setCellValueFactory(new PropertyValueFactory<>("posztNev"));
+        posztIdCol.setCellValueFactory(new PropertyValueFactory<>("posztneve"));
 
         // Oszlopok hozzáadása a táblázathoz
         tableView.getColumns().addAll(idCol, mezszamCol,klubidCol,utonevCol, vezeteknevCol, szulidoCol, magyarCol, kulfoldiCol, ertekCol, posztIdCol);
@@ -125,8 +111,10 @@ public class HelloController {
 
     public void loadDataFromDatabase(TableView<Labdarugo> tableView) {
         Connection conn = DatabaseConnection.connect();
-        String sql = "  SELECT id, mezszam,klubid,utonev, vezeteknev, szulido, magyar, kulfoldi, ertek,posztid \n" +
-                "           FROM labdarugo" ;
+        String sql = "SELECT l.id, l.mezszam, l.utonev, l.vezeteknev, l.szulido, l.magyar, l.kulfoldi, l.ertek, p.id AS posztid, k.id AS klubid " +
+                "FROM labdarugo l " +
+                "JOIN poszt p ON l.posztid = p.id " +
+                "JOIN klub k ON l.klubid = k.id";
 
         try {
             Statement stmt = conn.createStatement();
@@ -146,7 +134,20 @@ public class HelloController {
                 int ertek = rs.getInt("ertek");
                 int klubid = rs.getInt("klubid");
 
-                playerList.add(new Labdarugo(id, mezszam, posztid, utonev, vezeteknev, szulido, magyar,kulfoldi, ertek, klubid));
+
+
+                Poszt poszt = fetchPosztById(posztid);
+                String posztNev = poszt.getNev();
+                Klub klub = fetchKlubById(klubid);
+                String klubNev = klub.getNev();
+
+                /* ----- debugolasra voltak ezek
+                System.out.println("ID: " + id + ", Mezszam: " + mezszam + ", PosztId: " + posztid + ", KlubId: " + klubid);
+                System.out.println("Klub: " + klubNev);
+                System.out.println("Poszt: " + posztNev);
+                */
+
+                playerList.add(new Labdarugo(id, mezszam, posztNev, utonev, vezeteknev, szulido, magyar,kulfoldi, ertek, klubNev));
             }
 
             tableView.setItems(playerList);
@@ -157,6 +158,56 @@ public class HelloController {
             System.out.println("Hiba az adatok betöltése során: " + e.getMessage());
         }
     }
+
+    private Klub fetchKlubById(int klubid) {
+        Connection conn = DatabaseConnection.connect();
+        Klub klub = null;
+        String sql = "SELECT * FROM klub WHERE id = ?";
+
+
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, klubid);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                klub = new Klub(rs.getInt("id"), rs.getString("csapatnev"));
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Error fetching Klub by ID: " + e.getMessage());
+        }
+
+        return klub;
+    }
+
+    private Poszt fetchPosztById(int posztid) {
+        Connection conn = DatabaseConnection.connect();
+        Poszt poszt = null;
+        String sql = "SELECT * FROM poszt WHERE id = ?";
+
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, posztid);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                poszt = new Poszt(rs.getInt("id"), rs.getString("nev")); // Adjust the column names as needed
+            }
+
+            rs.close();
+            pstmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("Error fetching Poszt by ID: " + e.getMessage());
+        }
+
+        return poszt;
+    }
+
     public void olvas2Item(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
 

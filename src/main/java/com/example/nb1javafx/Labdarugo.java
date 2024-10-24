@@ -28,6 +28,9 @@
         @Column(name = "klubid")
         public int KlubId;
 
+        public String posztneve;
+        public String klubneve;
+
         @ManyToOne
         @JoinColumn(name = "klubid", referencedColumnName = "id")
         private Klub csapatnev;
@@ -38,19 +41,17 @@
 
 
 
-        public Labdarugo(int id, int mezszam, int posztId, String utonev, String vezeteknev, String szulido, boolean magyar, boolean kulfoldi, int ertek, int klubId, Poszt posztnev, Klub csapatnev) {
-            Id = id;
-            Mezszam = mezszam;
-            PosztId = posztId;
-            Utonev = utonev;
-            Vezeteknev = vezeteknev;
-            Szulido = szulido;
-            Magyar = magyar;
-            Kulfoldi = kulfoldi;
-            Ertek = ertek;
-            KlubId = klubId;
-            csapatnev = csapatnev;
-            posztnev = posztnev;
+        public Labdarugo(int id, int mezszam, String posztnev, String utonev, String vezeteknev, String szulido, boolean magyar, boolean kulfoldi, int ertek, String klubneve) {
+            this.Id = id;
+            this.Mezszam = mezszam;
+            this.posztneve = posztnev;
+            this.Utonev = utonev;
+            this.Vezeteknev = vezeteknev;
+            this.Szulido = szulido;
+            this.Magyar = magyar;
+            this.Kulfoldi = kulfoldi;
+            this.Ertek = ertek;
+            this.klubneve = klubneve;
         }
 
         public Labdarugo() {
@@ -153,5 +154,21 @@
 
         public void setKlubId(int klubId) {
             KlubId = klubId;
+        }
+
+        public String getPosztneve() {
+            return posztneve;
+        }
+
+        public void setPosztneve(String posztneve) {
+            this.posztneve = posztneve;
+        }
+
+        public String getKlubneve() {
+            return klubneve;
+        }
+
+        public void setKlubneve(String klubneve) {
+            this.klubneve = klubneve;
         }
     }
