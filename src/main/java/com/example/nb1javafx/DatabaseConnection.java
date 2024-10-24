@@ -9,7 +9,7 @@ public class DatabaseConnection {
     public static Connection connect() {
         Connection conn = null;
         try {
-            String url = "jdbc:sqlite:W:/NB-1.db";
+            String url = "jdbc:sqlite:../NB-1.db";
             conn = DriverManager.getConnection(url);
             System.out.println("Connection to SQLite has been established.");
         } catch (SQLException e) {

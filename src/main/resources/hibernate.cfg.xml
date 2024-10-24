@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-configuration">
 <hibernate-configuration>
     <session-factory>
-        <property name="connection.url">jdbc:sqlite:W:/NB-1.db</property>
+        <property name="connection.url">jdbc:sqlite:../NB-1.db</property>
         <mapping class="org.example.Labdarugo"/>
         <mapping class="org.example.Klub"/>
         <mapping class="org.example.Poszt"/>

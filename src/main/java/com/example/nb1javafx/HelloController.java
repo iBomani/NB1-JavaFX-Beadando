@@ -118,7 +118,6 @@ public class HelloController {
             ResultSet rs = stmt.executeQuery(sql);
 
             // Az adatok beolvasása és hozzáadása a TableView-hez
-            ObservableList<Labdarugo> playerList = FXCollections.observableArrayList();
 
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -206,11 +205,13 @@ public class HelloController {
         Scene scene = new Scene(root, 600, 400);
 
         try {
-
             MNBArfolyamServiceSoapImpl impl = new MNBArfolyamServiceSoapImpl();
-
         } catch (SOAPFaultException e) {
-            System.out.println(e.getMessage());;
+            System.out.println("SOAPFaultException: " + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            e.printStackTrace();
         }
 
 
