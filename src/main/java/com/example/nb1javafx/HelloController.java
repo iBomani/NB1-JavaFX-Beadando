@@ -251,9 +251,44 @@ public class HelloController {
     }
 
     private void startUpdatingLabels(Label label1, Label label2) {
-        System.out.println("teszt");
+        Thread thread1 = new Thread(() -> {
+            String[] texts1 = {"Tápiószele!", "Dános!", "Dánszentmiklós!", "Ford!"};
+            int index = 0;
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                final String text = texts1[index % texts1.length];
+                index++;
+                javafx.application.Platform.runLater(() -> label1.setText("Label 1: " + text));
+            }
+        });
 
+        Thread thread2 = new Thread(() -> {
+            String[] texts2 = {"Skoda!", "Tesla!", "Kroko!", "JAVA!"};
+            int index = 0;
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                final String text = texts2[index % texts2.length];
+                index++;
+                javafx.application.Platform.runLater(() -> label2.setText("Label 2: " + text));
+            }
+        });
+
+        thread1.setDaemon(true);
+        thread2.setDaemon(true);
+        thread1.start();
+        thread2.start();
     }
+
 
 
 }
