@@ -18,6 +18,7 @@ import soapmnb.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
 import soapmnb.MNBArfolyamServiceSoapImpl;
 
 import javax.xml.ws.soap.SOAPFaultException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -198,14 +199,22 @@ public class HelloController {
         newWindow.show();
     }
 
+    @FXML
     public void letoltesItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
 
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 600, 400);
 
+        MNBArfolyamServiceSoapImpl impl = new MNBArfolyamServiceSoapImpl();
+        MNBArfolyamServiceSoap service = impl.getCustomBindingMNBArfolyamServiceSoap();
+
         try {
-            MNBArfolyamServiceSoapImpl impl = new MNBArfolyamServiceSoapImpl();
+            System.out.println("VALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMI");
+            String resp = service.getExchangeRates("2021-04-01", "2021-04-30", "EUR");
+            Label label = new Label(resp);
+            root.setCenter(label);
+
         } catch (SOAPFaultException e) {
             System.out.println("SOAPFaultException: " + e.getMessage());
             e.printStackTrace();
@@ -215,8 +224,22 @@ public class HelloController {
         }
 
 
-
         newWindow.setTitle("2. feladat - Letöltés");
+        newWindow.setScene(scene);
+        newWindow.show();
+    }
+
+    @FXML
+    public void parhuzamosItem(ActionEvent actionEvent) {
+        Stage newWindow = new Stage();
+
+        BorderPane root = new BorderPane();
+        Scene scene = new Scene(root, 600, 400);
+
+        Label label = new Label("Hello GAMF!");
+        root.setCenter(label);
+
+        newWindow.setTitle("3. feladat - Párhuzamos");
         newWindow.setScene(scene);
         newWindow.show();
     }

@@ -30,7 +30,12 @@
                 </Menu>
 
                 <!-- Párhuzamos Menü -->
-                <Menu text="Párhuzamos"/>
+                <Menu text="Párhuzamos" >
+                    <items>
+                        <MenuItem text="Párhuzamos" onAction="#parhuzamosItem"/>
+                    </items>
+                </Menu>
+
 
                 <!-- Forex Menü -->
                 <Menu text="Forex">
