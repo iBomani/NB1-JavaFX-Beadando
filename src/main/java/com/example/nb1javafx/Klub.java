@@ -13,6 +13,22 @@ public class Klub {
     @Column(name = "csapatnev")
     private String Csapatnev;
 
+    public int getId() {
+        return Id;
+    }
+
+    public void setId(int id) {
+        Id = id;
+    }
+
+    public String getCsapatnev() {
+        return Csapatnev;
+    }
+
+    public void setCsapatnev(String csapatnev) {
+        Csapatnev = csapatnev;
+    }
+
     public Klub(int id, String csapatnev) {
         Id = id;
         Csapatnev = csapatnev;
