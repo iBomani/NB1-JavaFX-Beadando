@@ -23,7 +23,7 @@
                 <!-- SoapKliens Menü -->
                 <Menu text="SoapKliens">
                     <items>
-                        <MenuItem text="Letöltés"/>
+                        <MenuItem text="Letöltés" onAction="#letoltesItem"/>
                         <MenuItem text="Letöltés2"/>
                         <MenuItem text="Grafikon"/>
                     </items>

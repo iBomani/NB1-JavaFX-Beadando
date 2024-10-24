@@ -12,7 +12,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import soapmnb.MNBArfolyamServiceSoap;
+import soapmnb.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
+import soapmnb.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
+import soapmnb.MNBArfolyamServiceSoapImpl;
 
+import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -190,6 +195,27 @@ public class HelloController {
         root.setCenter(label);
 
         newWindow.setTitle("5. feladat - Töröl");
+        newWindow.setScene(scene);
+        newWindow.show();
+    }
+
+    public void letoltesItem(ActionEvent actionEvent) {
+        Stage newWindow = new Stage();
+
+        BorderPane root = new BorderPane();
+        Scene scene = new Scene(root, 600, 400);
+
+        try {
+
+            MNBArfolyamServiceSoapImpl impl = new MNBArfolyamServiceSoapImpl();
+
+        } catch (SOAPFaultException e) {
+            System.out.println(e.getMessage());;
+        }
+
+
+
+        newWindow.setTitle("2. feladat - Letöltés");
         newWindow.setScene(scene);
         newWindow.show();
     }
