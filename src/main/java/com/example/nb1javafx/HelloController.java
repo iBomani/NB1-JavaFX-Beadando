@@ -5,12 +5,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import soapmnb.MNBArfolyamServiceSoap;
 import soapmnb.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
@@ -234,13 +232,28 @@ public class HelloController {
         Stage newWindow = new Stage();
 
         BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 600, 400);
 
-        Label label = new Label("Hello GAMF!");
-        root.setCenter(label);
+        Label label1 = new Label("Label1: Hello Dános!");
+        Label label2 = new Label("Label2: Hello Szele!");
+
+        Button button = new Button("Start!");
+
+        button.setOnAction(event -> startUpdatingLabels(label1, label2));
+
+        VBox vBox = new VBox(10, label1, label2, button);
+
+        Scene scene = new Scene(vBox, 600, 400);
+
 
         newWindow.setTitle("3. feladat - Párhuzamos");
         newWindow.setScene(scene);
         newWindow.show();
     }
+
+    private void startUpdatingLabels(Label label1, Label label2) {
+        System.out.println("teszt");
+
+    }
+
+
 }
