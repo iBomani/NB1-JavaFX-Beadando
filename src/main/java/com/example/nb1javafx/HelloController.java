@@ -186,7 +186,7 @@ public class HelloController {
     }
 
 
-    private Boolean magyar = true;
+    private String magyar;
     public void olvas2Item(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
         BorderPane root = new BorderPane();
@@ -218,9 +218,9 @@ public class HelloController {
             String poszt = posztComboBox.getValue();
 
             if (magyarRadio.isSelected()) {
-                magyar = true;
+                magyar = "true";
             } else if (kulfoldiRadio.isSelected()) {
-                magyar = false;
+                magyar = "false";
             }
 
              // System.out.println("Magyar: " + magyar);
@@ -296,7 +296,7 @@ public class HelloController {
 
         tableView.getColumns().addAll(idCol, vezeteknevCol, utonevCol, szulidoCol, magyarCol, kulfoldiCol,  mezszamCol, klubidCol, posztIdCol, ertekCol);
     }
-    private void loadFilteredDataFromDatabase(String utonev, String poszt, boolean magyar, boolean age) {
+    private void loadFilteredDataFromDatabase(String utonev, String poszt, String magyar, boolean age) {
 
         StringBuilder sql = new StringBuilder("SELECT l.id, l.mezszam, l.utonev, l.vezeteknev, l.szulido, l.magyar, l.kulfoldi, l.ertek, p.id AS posztid, k.id AS klubid " +
                 "FROM labdarugo l " +
@@ -309,14 +309,19 @@ public class HelloController {
         if (poszt != null) {
             sql.append(" AND p.nev = '").append(poszt).append("'");
         }
-        if (magyar) {
-            sql.append(" AND l.magyar = -1");
+
+        if (magyar == "true") {
+            sql.append(" AND (l.magyar = -1 OR l.magyar = 1)");
+        } else if (magyar == "false") {
+            sql.append(" AND (l.kulfoldi = -1 OR l.kulfoldi = 1)");
         } else {
-            sql.append(" AND l.kulfoldi = -1");
+            sql.append(" AND (l.magyar = -1 OR l.kulfoldi = -1 OR l.magyar = 1 OR l.kulfoldi = 1)");
         }
         if(age) {
             sql.append(" AND l.szulido > DATE('now', '-25 years')");
         }
+
+        System.out.println("SQL: " + sql.toString());
 
         try (Connection conn = DatabaseConnection.connect();
              Statement stmt = conn.createStatement();
