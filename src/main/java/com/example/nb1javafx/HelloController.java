@@ -783,7 +783,28 @@ public class HelloController {
         thread1.start();
         thread2.start();
     }
+    @FXML
+    public void szamlainformaciokItem(ActionEvent actionEvent){
 
+    }
+    @FXML
+    public void aktualisarakItem(ActionEvent actionEvent){
 
+    }
+    @FXML
+    public void historikusarakItem(ActionEvent actionEvent){
 
+    }
+    @FXML
+    public void pozicionyitasItem(ActionEvent actionEvent){
+
+    }
+    @FXML
+    public void poziciozarasItem(ActionEvent actionEvent){
+
+    }
+    @FXML
+    public void nyitottpoziciokItem(ActionEvent actionEvent){
+
+    }
 }

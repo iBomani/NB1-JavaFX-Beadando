@@ -40,12 +40,12 @@
                 <!-- Forex Menü -->
                 <Menu text="Forex">
                     <items>
-                        <MenuItem text="Számlainformációk"/>
-                        <MenuItem text="Aktuális árak"/>
-                        <MenuItem text="Historikus árak"/>
-                        <MenuItem text="Pozíció nyitás"/>
-                        <MenuItem text="Pozíció zárás"/>
-                        <MenuItem text="Nyitott pozíciók"/>
+                        <MenuItem text="Számlainformációk" onAction="#szamlainformaciokItem"/>
+                        <MenuItem text="Aktuális árak" onAction="#aktualisarakItem"/>
+                        <MenuItem text="Historikus árak" onAction="#historikusarakItem"/>
+                        <MenuItem text="Pozíció nyitás" onAction="#pozicionyitasItem"/>
+                        <MenuItem text="Pozíció zárás" onAction="#poziciozarasItem"/>
+                        <MenuItem text="Nyitott pozíciók" onAction="#nyitottpoziciokItem"/>
                     </items>
                 </Menu>
             </menus>
