@@ -404,19 +404,26 @@ public class HelloController {
         newWindow.show();
     }
 
-    private void populateIdComboBox(ComboBox<Integer> idComboBox) {
+    public void populateIdComboBox(ComboBox<Integer> comboBox) {
+        comboBox.getItems().clear();
+        Connection conn = DatabaseConnection.connect();
         String sql = "SELECT id FROM labdarugo";
-        try (Connection conn = DatabaseConnection.connect();
-             Statement stmt = conn.createStatement();
+
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                idComboBox.getItems().add(rs.getInt("id"));
+                int id = rs.getInt("id");
+                if (!comboBox.getItems().contains(id)) {
+                    comboBox.getItems().add(id);
+                }
             }
+
         } catch (SQLException e) {
-            System.out.println("Error populating ComboBox: " + e.getMessage());
+            System.out.println("Error populating ComboBox with IDs: " + e.getMessage());
         }
     }
+
 
     private void loadRecordDetails(int id, TextField mezszamField, TextField utonevField, TextField vezeteknevField,
                                    TextField szulidoField, CheckBox magyarCheckBox, CheckBox kulfoldiCheckBox,
@@ -476,17 +483,69 @@ public class HelloController {
 
     public void torolItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
-
         BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 400, 200);
 
-        Label label = new Label("Hello GAMF!");
-        root.setCenter(label);
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+
+
+        ComboBox<Integer> idComboBox = new ComboBox<>();
+        idComboBox.setPromptText("Válasszon azonosítót törléshez");
+
+
+        idComboBox.getItems().clear();
+        populateIdComboBox(idComboBox);
+
+
+        Button deleteButton = new Button("Törlés");
+        deleteButton.setDisable(true);
+
+
+        idComboBox.setOnAction(event -> {
+            deleteButton.setDisable(idComboBox.getValue() == null);
+        });
+
+
+        deleteButton.setOnAction(event -> {
+            int selectedId = idComboBox.getValue();
+            deleteRecordFromDatabase(selectedId);
+            idComboBox.getItems().remove(Integer.valueOf(selectedId));
+        });
+
+
+        layout.getChildren().addAll(
+                new Label("Rekord törlése:"),
+                idComboBox, deleteButton
+        );
+        root.setCenter(layout);
 
         newWindow.setTitle("5. feladat - Töröl");
         newWindow.setScene(scene);
         newWindow.show();
     }
+
+
+
+    private void deleteRecordFromDatabase(int id) {
+        String sql = "DELETE FROM labdarugo WHERE id = ?";
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Record with ID " + id + " deleted successfully.");
+            } else {
+                System.out.println("No record found with ID " + id + ".");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error deleting record: " + e.getMessage());
+        }
+    }
+
 
     @FXML
     public void letoltesItem(ActionEvent actionEvent) {
