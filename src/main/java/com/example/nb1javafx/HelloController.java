@@ -57,6 +57,7 @@ public class HelloController {
     private TableColumn<Labdarugo, String> posztIdCol;
 
     private final ObservableList<Labdarugo> playerList = FXCollections.observableArrayList();
+    private final ObservableList<Labdarugo> filtered_playerList = FXCollections.observableArrayList();
     @FXML
     private MenuItem olvasItem;
 
@@ -308,7 +309,7 @@ public class HelloController {
 
         tableView.getColumns().addAll(idCol, mezszamCol, klubidCol, utonevCol, vezeteknevCol, szulidoCol, magyarCol, kulfoldiCol, ertekCol);
     }
-    private void loadFilteredDataFromDatabase(String utonev, String poszt, Boolean magyar, boolean aktiv) {
+    private void loadFilteredDataFromDatabase(String utonev, String poszt, boolean magyar, boolean aktiv) {
 
         StringBuilder sql = new StringBuilder("SELECT l.id, l.mezszam, l.utonev, l.vezeteknev, l.szulido, l.magyar, l.kulfoldi, l.ertek, p.id AS posztid, k.id AS klubid " +
                 "FROM labdarugo l " +
@@ -321,8 +322,8 @@ public class HelloController {
         if (poszt != null) {
             sql.append(" AND p.nev = '").append(poszt).append("'");
         }
-        if (magyar != null) {
-            sql.append(" AND l.magyar = ").append(magyar);
+        if (magyar) {
+            sql.append(" AND l.magyar = TRUE");
         }
         if (aktiv) {
             sql.append(" AND l.aktiv = TRUE");
@@ -332,7 +333,7 @@ public class HelloController {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql.toString())) {
 
-            playerList.clear(); //
+            filtered_playerList.clear(); //
             while (rs.next()) {
                 int id = rs.getInt("id");
                 int mezszam = rs.getInt("mezszam");
@@ -346,14 +347,14 @@ public class HelloController {
                 int klubid = rs.getInt("klubid");
 
 
-                playerList.add(new Labdarugo(id, mezszam, null, utonevValue, vezeteknev, szulido, magyarValue, kulfoldi, ertek, null));
+                filtered_playerList.add(new Labdarugo(id, mezszam, null, utonevValue, vezeteknev, szulido, magyarValue, kulfoldi, ertek, null));
             }
         } catch (SQLException e) {
             System.out.println("Hiba a szűrt adatok betöltésekor: " + e.getMessage());
         }
 
 
-        tableView.setItems(playerList);
+        tableView.setItems(filtered_playerList);
     }
     public void irItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
