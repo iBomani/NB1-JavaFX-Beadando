@@ -72,10 +72,10 @@ public class HelloController {
 
 
         tableView = new TableView<>();
-
+        loadDataFromDatabase(tableView);
         setupTableColumns();
 
-        loadDataFromDatabase(tableView);
+
 
 
         tableView.setItems(playerList);
@@ -670,6 +670,7 @@ public class HelloController {
 
             if (rowsAffected > 0) {
                 System.out.println("Record with ID " + id + " deleted successfully.");
+                refreshTable();
             } else {
                 System.out.println("No record found with ID " + id + ".");
             }
@@ -677,6 +678,10 @@ public class HelloController {
         } catch (SQLException e) {
             System.out.println("Error deleting record: " + e.getMessage());
         }
+    }
+
+    private void refreshTable() {
+        tableView.getItems().clear();
     }
 
 
