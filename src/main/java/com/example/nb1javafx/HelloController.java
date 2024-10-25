@@ -230,7 +230,7 @@ public class HelloController {
         VBox formLayout = new VBox(10);
         formLayout.setPadding(new Insets(20));
 
-        // Create input fields
+
         TextField mezszamField = new TextField();
         mezszamField.setPromptText("Mezszám");
 
@@ -257,7 +257,7 @@ public class HelloController {
 
         Button submitButton = new Button("Hozzáadás");
 
-        // Add input fields to the form layout
+
         formLayout.getChildren().addAll(
                 new Label("Új Labdarugó hozzáadása:"),
                 mezszamField, utonevField, vezeteknevField,
@@ -267,7 +267,7 @@ public class HelloController {
 
         root.setCenter(formLayout);
 
-        // Add action to submit button
+
         submitButton.setOnAction(event -> {
             int mezszam = Integer.parseInt(mezszamField.getText());
             String utonev = utonevField.getText();
@@ -279,10 +279,10 @@ public class HelloController {
             int klubid = Integer.parseInt(klubidField.getText());
             int posztid = Integer.parseInt(posztidField.getText());
 
-            // Insert data into database
+
             insertLabdarugoToDatabase(mezszam, utonev, vezeteknev, szulido, magyar, kulfoldi, ertek, klubid, posztid);
 
-            // Clear the form fields after submission
+
             mezszamField.clear();
             utonevField.clear();
             vezeteknevField.clear();
@@ -327,17 +327,152 @@ public class HelloController {
 
     public void modositItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
-
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 600, 400);
 
-        Label label = new Label("Hello GAMF!");
-        root.setCenter(label);
+        VBox formLayout = new VBox(10);
+        formLayout.setPadding(new Insets(20));
+
+
+        ComboBox<Integer> idComboBox = new ComboBox<>();
+        idComboBox.setPromptText("Válasszon azonosítót");
+
+
+        populateIdComboBox(idComboBox);
+
+
+        TextField mezszamField = new TextField();
+        mezszamField.setPromptText("Mezszám");
+
+        TextField utonevField = new TextField();
+        utonevField.setPromptText("Utónév");
+
+        TextField vezeteknevField = new TextField();
+        vezeteknevField.setPromptText("Vezetéknév");
+
+        TextField szulidoField = new TextField();
+        szulidoField.setPromptText("Születési dátum (YYYY-MM-DD)");
+
+        CheckBox magyarCheckBox = new CheckBox("Magyar");
+        CheckBox kulfoldiCheckBox = new CheckBox("Külföldi");
+
+        TextField ertekField = new TextField();
+        ertekField.setPromptText("Érték");
+
+        TextField klubidField = new TextField();
+        klubidField.setPromptText("Klub ID");
+
+        TextField posztidField = new TextField();
+        posztidField.setPromptText("Poszt ID");
+
+        Button submitButton = new Button("Módosítás");
+
+
+        idComboBox.setOnAction(event -> {
+            int selectedId = idComboBox.getValue();
+            loadRecordDetails(selectedId, mezszamField, utonevField, vezeteknevField, szulidoField, magyarCheckBox, kulfoldiCheckBox, ertekField, klubidField, posztidField);
+        });
+
+
+        formLayout.getChildren().addAll(
+                new Label("Rekord módosítása:"),
+                idComboBox, mezszamField, utonevField, vezeteknevField,
+                szulidoField, magyarCheckBox, kulfoldiCheckBox,
+                ertekField, klubidField, posztidField, submitButton
+        );
+
+        root.setCenter(formLayout);
+
+
+        submitButton.setOnAction(event -> {
+            int id = idComboBox.getValue();
+            int mezszam = Integer.parseInt(mezszamField.getText());
+            String utonev = utonevField.getText();
+            String vezeteknev = vezeteknevField.getText();
+            String szulido = szulidoField.getText();
+            boolean magyar = magyarCheckBox.isSelected();
+            boolean kulfoldi = kulfoldiCheckBox.isSelected();
+            int ertek = Integer.parseInt(ertekField.getText());
+            int klubid = Integer.parseInt(klubidField.getText());
+            int posztid = Integer.parseInt(posztidField.getText());
+
+            updateRecordInDatabase(id, mezszam, utonev, vezeteknev, szulido, magyar, kulfoldi, ertek, klubid, posztid);
+        });
 
         newWindow.setTitle("4. feladat - Módosít");
         newWindow.setScene(scene);
         newWindow.show();
     }
+
+    private void populateIdComboBox(ComboBox<Integer> idComboBox) {
+        String sql = "SELECT id FROM labdarugo";
+        try (Connection conn = DatabaseConnection.connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                idComboBox.getItems().add(rs.getInt("id"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error populating ComboBox: " + e.getMessage());
+        }
+    }
+
+    private void loadRecordDetails(int id, TextField mezszamField, TextField utonevField, TextField vezeteknevField,
+                                   TextField szulidoField, CheckBox magyarCheckBox, CheckBox kulfoldiCheckBox,
+                                   TextField ertekField, TextField klubidField, TextField posztidField) {
+        String sql = "SELECT * FROM labdarugo WHERE id = ?";
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                mezszamField.setText(String.valueOf(rs.getInt("mezszam")));
+                utonevField.setText(rs.getString("utonev"));
+                vezeteknevField.setText(rs.getString("vezeteknev"));
+                szulidoField.setText(rs.getString("szulido"));
+                magyarCheckBox.setSelected(rs.getBoolean("magyar"));
+                kulfoldiCheckBox.setSelected(rs.getBoolean("kulfoldi"));
+                ertekField.setText(String.valueOf(rs.getInt("ertek")));
+                klubidField.setText(String.valueOf(rs.getInt("klubid")));
+                posztidField.setText(String.valueOf(rs.getInt("posztid")));
+            }
+
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println("Error loading record details: " + e.getMessage());
+        }
+    }
+
+    private void updateRecordInDatabase(int id, int mezszam, String utonev, String vezeteknev, String szulido,
+                                        boolean magyar, boolean kulfoldi, int ertek, int klubid, int posztid) {
+        String sql = "UPDATE labdarugo SET mezszam = ?, utonev = ?, vezeteknev = ?, szulido = ?, magyar = ?, kulfoldi = ?, " +
+                "ertek = ?, klubid = ?, posztid = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, mezszam);
+            pstmt.setString(2, utonev);
+            pstmt.setString(3, vezeteknev);
+            pstmt.setString(4, szulido);
+            pstmt.setBoolean(5, magyar);
+            pstmt.setBoolean(6, kulfoldi);
+            pstmt.setInt(7, ertek);
+            pstmt.setInt(8, klubid);
+            pstmt.setInt(9, posztid);
+            pstmt.setInt(10, id);
+
+            pstmt.executeUpdate();
+            System.out.println("Record updated successfully.");
+
+        } catch (SQLException e) {
+            System.out.println("Error updating record: " + e.getMessage());
+        }
+    }
+
 
     public void torolItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
@@ -387,31 +522,30 @@ public class HelloController {
     public void parhuzamosItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
 
-        // Create the root layout
+
         BorderPane root = new BorderPane();
         VBox vBox = new VBox(15);
-        vBox.setPadding(new Insets(20)); // Add padding around the VBox
+        vBox.setPadding(new Insets(20));
 
-        // Create labels with styling
+
         Label label1 = new Label("Label 1: Hello Dános!");
         label1.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        label1.setTextFill(Color.DARKBLUE); // Set text color
+        label1.setTextFill(Color.DARKBLUE);
 
         Label label2 = new Label("Label 2: Hello Szele!");
         label2.setFont(Font.font("Arial", FontWeight.BOLD, 24));
-        label2.setTextFill(Color.DARKGREEN); // Set text color
+        label2.setTextFill(Color.DARKGREEN);
 
-        // Create a button with styling
         Button button = new Button("Start!");
         button.setFont(Font.font("Arial", FontWeight.BOLD, 18));
-        button.setStyle("-fx-background-color: lightgray; -fx-padding: 10px;"); // Set background color and padding
+        button.setStyle("-fx-background-color: lightgray; -fx-padding: 10px;");
 
         button.setOnAction(event -> startUpdatingLabels(label1, label2));
 
-        // Add components to the VBox
+
         vBox.getChildren().addAll(label1, label2, button);
 
-        // Set the scene and show the window
+
         Scene scene = new Scene(vBox, 600, 400);
         newWindow.setTitle("3. feladat - Párhuzamos");
         newWindow.setScene(scene);
