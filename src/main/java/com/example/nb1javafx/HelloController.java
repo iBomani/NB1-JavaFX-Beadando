@@ -58,6 +58,8 @@ public class HelloController {
 
     private final ObservableList<Labdarugo> playerList = FXCollections.observableArrayList();
     private final ObservableList<Labdarugo> filtered_playerList = FXCollections.observableArrayList();
+
+
     @FXML
     private MenuItem olvasItem;
 
@@ -71,35 +73,7 @@ public class HelloController {
 
         tableView = new TableView<>();
 
-
-        idCol = new TableColumn<>("ID");
-        mezszamCol = new TableColumn<>("Mezszám:");
-        klubidCol = new TableColumn<>("KlubId:");
-        utonevCol = new TableColumn<>("Utónév");
-        vezeteknevCol = new TableColumn<>("Vezetéknév");
-        szulidoCol = new TableColumn<>("Születési dátum");
-        magyarCol = new TableColumn<>("Magyar");
-        kulfoldiCol = new TableColumn<>("Külföldi");
-        ertekCol = new TableColumn<>("Érték");
-
-        posztIdCol = new TableColumn<>("PosztId");
-
-
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        mezszamCol.setCellValueFactory(new PropertyValueFactory<>("mezszam"));
-        klubidCol.setCellValueFactory(new PropertyValueFactory<>("klubneve"));
-        utonevCol.setCellValueFactory(new PropertyValueFactory<>("utonev"));
-        vezeteknevCol.setCellValueFactory(new PropertyValueFactory<>("vezeteknev"));
-        szulidoCol.setCellValueFactory(new PropertyValueFactory<>("szulido"));
-        magyarCol.setCellValueFactory(new PropertyValueFactory<>("magyar"));
-        kulfoldiCol.setCellValueFactory(new PropertyValueFactory<>("kulfoldi"));
-        ertekCol.setCellValueFactory(new PropertyValueFactory<>("ertek"));
-
-        posztIdCol.setCellValueFactory(new PropertyValueFactory<>("posztneve"));
-
-
-        tableView.getColumns().addAll(idCol, mezszamCol,klubidCol,utonevCol, vezeteknevCol, szulidoCol, magyarCol, kulfoldiCol, ertekCol, posztIdCol);
-
+        setupTableColumns();
 
         loadDataFromDatabase(tableView);
 
@@ -211,6 +185,8 @@ public class HelloController {
         return poszt;
     }
 
+
+    private Boolean magyar = true;
     public void olvas2Item(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
         BorderPane root = new BorderPane();
@@ -227,27 +203,32 @@ public class HelloController {
         posztComboBox.setPromptText("Válasszon posztot");
         loadPosztok(posztComboBox);
 
+        CheckBox ageCheckBox = new CheckBox("25 évnél fiatalabb");
+
         ToggleGroup magyarKulfoldiGroup = new ToggleGroup();
         RadioButton magyarRadio = new RadioButton("Magyar");
         RadioButton kulfoldiRadio = new RadioButton("Külföldi");
         magyarRadio.setToggleGroup(magyarKulfoldiGroup);
         kulfoldiRadio.setToggleGroup(magyarKulfoldiGroup);
 
-        CheckBox aktivCheckBox = new CheckBox("Csak aktív játékosok");
 
         Button szuroButton = new Button("Szűrés");
         szuroButton.setOnAction(e -> {
             String utonev = utonevField.getText();
             String poszt = posztComboBox.getValue();
-            Boolean magyar = null;
+
             if (magyarRadio.isSelected()) {
                 magyar = true;
             } else if (kulfoldiRadio.isSelected()) {
                 magyar = false;
             }
-            boolean aktiv = aktivCheckBox.isSelected();
 
-            loadFilteredDataFromDatabase(utonev, poszt, magyar, aktiv);
+             // System.out.println("Magyar: " + magyar);
+            boolean age = ageCheckBox.isSelected();
+
+
+
+            loadFilteredDataFromDatabase(utonev, poszt, magyar, age);
         });
 
         formLayout.getChildren().addAll(
@@ -256,7 +237,7 @@ public class HelloController {
                 posztComboBox,
                 magyarRadio,
                 kulfoldiRadio,
-                aktivCheckBox,
+                ageCheckBox,
                 szuroButton
         );
 
@@ -286,19 +267,23 @@ public class HelloController {
     }
     private void setupTableColumns() {
 
+
+
         idCol = new TableColumn<>("ID");
-        mezszamCol = new TableColumn<>("Mezszám");
-        klubidCol = new TableColumn<>("KlubId");
         utonevCol = new TableColumn<>("Utónév");
         vezeteknevCol = new TableColumn<>("Vezetéknév");
         szulidoCol = new TableColumn<>("Születési dátum");
         magyarCol = new TableColumn<>("Magyar");
         kulfoldiCol = new TableColumn<>("Külföldi");
+        mezszamCol = new TableColumn<>("Mezszám");
+        klubidCol = new TableColumn<>("Klub név");
+        posztIdCol = new TableColumn<>("Poszt");
         ertekCol = new TableColumn<>("Érték");
 
 
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         mezszamCol.setCellValueFactory(new PropertyValueFactory<>("mezszam"));
+        klubidCol.setCellValueFactory(new PropertyValueFactory<>("klubneve"));
         utonevCol.setCellValueFactory(new PropertyValueFactory<>("utonev"));
         vezeteknevCol.setCellValueFactory(new PropertyValueFactory<>("vezeteknev"));
         szulidoCol.setCellValueFactory(new PropertyValueFactory<>("szulido"));
@@ -306,10 +291,12 @@ public class HelloController {
         kulfoldiCol.setCellValueFactory(new PropertyValueFactory<>("kulfoldi"));
         ertekCol.setCellValueFactory(new PropertyValueFactory<>("ertek"));
 
+        posztIdCol.setCellValueFactory(new PropertyValueFactory<>("posztneve"));
 
-        tableView.getColumns().addAll(idCol, mezszamCol, klubidCol, utonevCol, vezeteknevCol, szulidoCol, magyarCol, kulfoldiCol, ertekCol);
+
+        tableView.getColumns().addAll(idCol, vezeteknevCol, utonevCol, szulidoCol, magyarCol, kulfoldiCol,  mezszamCol, klubidCol, posztIdCol, ertekCol);
     }
-    private void loadFilteredDataFromDatabase(String utonev, String poszt, boolean magyar, boolean aktiv) {
+    private void loadFilteredDataFromDatabase(String utonev, String poszt, boolean magyar, boolean age) {
 
         StringBuilder sql = new StringBuilder("SELECT l.id, l.mezszam, l.utonev, l.vezeteknev, l.szulido, l.magyar, l.kulfoldi, l.ertek, p.id AS posztid, k.id AS klubid " +
                 "FROM labdarugo l " +
@@ -323,10 +310,12 @@ public class HelloController {
             sql.append(" AND p.nev = '").append(poszt).append("'");
         }
         if (magyar) {
-            sql.append(" AND l.magyar = TRUE");
+            sql.append(" AND l.magyar = -1");
+        } else {
+            sql.append(" AND l.kulfoldi = -1");
         }
-        if (aktiv) {
-            sql.append(" AND l.aktiv = TRUE");
+        if(age) {
+            sql.append(" AND l.szulido > DATE('now', '-25 years')");
         }
 
         try (Connection conn = DatabaseConnection.connect();
@@ -346,8 +335,13 @@ public class HelloController {
                 int posztid = rs.getInt("posztid");
                 int klubid = rs.getInt("klubid");
 
+                Klub klub = fetchKlubById(klubid);
+                String klubNev = klub.getNev();
+                Poszt posztObj = fetchPosztById(posztid);
+                String posztNev = posztObj.getNev();
 
-                filtered_playerList.add(new Labdarugo(id, mezszam, null, utonevValue, vezeteknev, szulido, magyarValue, kulfoldi, ertek, null));
+
+                filtered_playerList.add(new Labdarugo(id, mezszam, posztNev, utonevValue, vezeteknev, szulido, magyarValue, kulfoldi, ertek, klubNev));
             }
         } catch (SQLException e) {
             System.out.println("Hiba a szűrt adatok betöltésekor: " + e.getMessage());
