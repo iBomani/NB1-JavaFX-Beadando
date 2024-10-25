@@ -66,9 +66,11 @@ public class HelloController {
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 800, 600);
 
+
+
         tableView = new TableView<>();
 
-        // Oszlopok létrehozása
+
         idCol = new TableColumn<>("ID");
         mezszamCol = new TableColumn<>("Mezszám:");
         klubidCol = new TableColumn<>("KlubId:");
@@ -81,7 +83,7 @@ public class HelloController {
 
         posztIdCol = new TableColumn<>("PosztId");
 
-        // Oszlopok értékekhez kötése
+
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         mezszamCol.setCellValueFactory(new PropertyValueFactory<>("mezszam"));
         klubidCol.setCellValueFactory(new PropertyValueFactory<>("klubneve"));
@@ -94,13 +96,13 @@ public class HelloController {
 
         posztIdCol.setCellValueFactory(new PropertyValueFactory<>("posztneve"));
 
-        // Oszlopok hozzáadása a táblázathoz
+
         tableView.getColumns().addAll(idCol, mezszamCol,klubidCol,utonevCol, vezeteknevCol, szulidoCol, magyarCol, kulfoldiCol, ertekCol, posztIdCol);
 
-        // Adatok betöltése
+
         loadDataFromDatabase(tableView);
 
-        // Táblázat adatokkal
+
         tableView.setItems(playerList);
 
         root.setCenter(tableView);
@@ -120,7 +122,7 @@ public class HelloController {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
-            // Az adatok beolvasása és hozzáadása a TableView-hez
+
 
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -195,7 +197,7 @@ public class HelloController {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                poszt = new Poszt(rs.getInt("id"), rs.getString("nev")); // Adjust the column names as needed
+                poszt = new Poszt(rs.getInt("id"), rs.getString("nev"));
             }
 
             rs.close();
@@ -210,18 +212,149 @@ public class HelloController {
 
     public void olvas2Item(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
-
         BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 800, 600);
 
-        Label label = new Label("Hello GAMF!");
-        root.setCenter(label);
+        VBox formLayout = new VBox(10);
+        formLayout.setPadding(new Insets(20));
+
+
+        TextField utonevField = new TextField();
+        utonevField.setPromptText("Utónév (szűrés)");
+
+        ComboBox<String> posztComboBox = new ComboBox<>();
+        posztComboBox.setPromptText("Válasszon posztot");
+        loadPosztok(posztComboBox);
+
+        ToggleGroup magyarKulfoldiGroup = new ToggleGroup();
+        RadioButton magyarRadio = new RadioButton("Magyar");
+        RadioButton kulfoldiRadio = new RadioButton("Külföldi");
+        magyarRadio.setToggleGroup(magyarKulfoldiGroup);
+        kulfoldiRadio.setToggleGroup(magyarKulfoldiGroup);
+
+        CheckBox aktivCheckBox = new CheckBox("Csak aktív játékosok");
+
+        Button szuroButton = new Button("Szűrés");
+        szuroButton.setOnAction(e -> {
+            String utonev = utonevField.getText();
+            String poszt = posztComboBox.getValue();
+            Boolean magyar = null;
+            if (magyarRadio.isSelected()) {
+                magyar = true;
+            } else if (kulfoldiRadio.isSelected()) {
+                magyar = false;
+            }
+            boolean aktiv = aktivCheckBox.isSelected();
+
+            loadFilteredDataFromDatabase(utonev, poszt, magyar, aktiv);
+        });
+
+        formLayout.getChildren().addAll(
+                new Label("Adatok szűrése:"),
+                utonevField,
+                posztComboBox,
+                magyarRadio,
+                kulfoldiRadio,
+                aktivCheckBox,
+                szuroButton
+        );
+
+        tableView = new TableView<>();
+        setupTableColumns();
+
+        root.setTop(formLayout);
+        root.setCenter(tableView);
 
         newWindow.setTitle("2. feladat - Olvas2");
         newWindow.setScene(scene);
         newWindow.show();
     }
 
+
+    private void loadPosztok(ComboBox<String> posztComboBox) {
+
+        Connection conn = DatabaseConnection.connect();
+        String sql = "SELECT nev FROM poszt";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                posztComboBox.getItems().add(rs.getString("nev"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Hiba a posztok betöltésekor: " + e.getMessage());
+        }
+    }
+    private void setupTableColumns() {
+
+        idCol = new TableColumn<>("ID");
+        mezszamCol = new TableColumn<>("Mezszám");
+        klubidCol = new TableColumn<>("KlubId");
+        utonevCol = new TableColumn<>("Utónév");
+        vezeteknevCol = new TableColumn<>("Vezetéknév");
+        szulidoCol = new TableColumn<>("Születési dátum");
+        magyarCol = new TableColumn<>("Magyar");
+        kulfoldiCol = new TableColumn<>("Külföldi");
+        ertekCol = new TableColumn<>("Érték");
+
+
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        mezszamCol.setCellValueFactory(new PropertyValueFactory<>("mezszam"));
+        utonevCol.setCellValueFactory(new PropertyValueFactory<>("utonev"));
+        vezeteknevCol.setCellValueFactory(new PropertyValueFactory<>("vezeteknev"));
+        szulidoCol.setCellValueFactory(new PropertyValueFactory<>("szulido"));
+        magyarCol.setCellValueFactory(new PropertyValueFactory<>("magyar"));
+        kulfoldiCol.setCellValueFactory(new PropertyValueFactory<>("kulfoldi"));
+        ertekCol.setCellValueFactory(new PropertyValueFactory<>("ertek"));
+
+
+        tableView.getColumns().addAll(idCol, mezszamCol, klubidCol, utonevCol, vezeteknevCol, szulidoCol, magyarCol, kulfoldiCol, ertekCol);
+    }
+    private void loadFilteredDataFromDatabase(String utonev, String poszt, Boolean magyar, boolean aktiv) {
+
+        StringBuilder sql = new StringBuilder("SELECT l.id, l.mezszam, l.utonev, l.vezeteknev, l.szulido, l.magyar, l.kulfoldi, l.ertek, p.id AS posztid, k.id AS klubid " +
+                "FROM labdarugo l " +
+                "JOIN poszt p ON l.posztid = p.id " +
+                "JOIN klub k ON l.klubid = k.id WHERE 1=1"); // Alapértelmezett feltétel
+
+        if (utonev != null && !utonev.isEmpty()) {
+            sql.append(" AND l.utonev LIKE '%").append(utonev).append("%'");
+        }
+        if (poszt != null) {
+            sql.append(" AND p.nev = '").append(poszt).append("'");
+        }
+        if (magyar != null) {
+            sql.append(" AND l.magyar = ").append(magyar);
+        }
+        if (aktiv) {
+            sql.append(" AND l.aktiv = TRUE");
+        }
+
+        try (Connection conn = DatabaseConnection.connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql.toString())) {
+
+            playerList.clear(); //
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int mezszam = rs.getInt("mezszam");
+                String utonevValue = rs.getString("utonev");
+                String vezeteknev = rs.getString("vezeteknev");
+                String szulido = rs.getString("szulido");
+                boolean magyarValue = rs.getBoolean("magyar");
+                boolean kulfoldi = rs.getBoolean("kulfoldi");
+                int ertek = rs.getInt("ertek");
+                int posztid = rs.getInt("posztid");
+                int klubid = rs.getInt("klubid");
+
+
+                playerList.add(new Labdarugo(id, mezszam, null, utonevValue, vezeteknev, szulido, magyarValue, kulfoldi, ertek, null));
+            }
+        } catch (SQLException e) {
+            System.out.println("Hiba a szűrt adatok betöltésekor: " + e.getMessage());
+        }
+
+
+        tableView.setItems(playerList);
+    }
     public void irItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
         BorderPane root = new BorderPane();
