@@ -224,17 +224,106 @@ public class HelloController {
 
     public void irItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
-
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 600, 400);
 
-        Label label = new Label("Hello GAMF!");
-        root.setCenter(label);
+        VBox formLayout = new VBox(10);
+        formLayout.setPadding(new Insets(20));
+
+        // Create input fields
+        TextField mezszamField = new TextField();
+        mezszamField.setPromptText("Mezszám");
+
+        TextField utonevField = new TextField();
+        utonevField.setPromptText("Utónév");
+
+        TextField vezeteknevField = new TextField();
+        vezeteknevField.setPromptText("Vezetéknév");
+
+        TextField szulidoField = new TextField();
+        szulidoField.setPromptText("Születési dátum (YYYY-MM-DD)");
+
+        CheckBox magyarCheckBox = new CheckBox("Magyar");
+        CheckBox kulfoldiCheckBox = new CheckBox("Külföldi");
+
+        TextField ertekField = new TextField();
+        ertekField.setPromptText("Érték");
+
+        TextField klubidField = new TextField();
+        klubidField.setPromptText("Klub ID");
+
+        TextField posztidField = new TextField();
+        posztidField.setPromptText("Poszt ID");
+
+        Button submitButton = new Button("Hozzáadás");
+
+        // Add input fields to the form layout
+        formLayout.getChildren().addAll(
+                new Label("Új Labdarugó hozzáadása:"),
+                mezszamField, utonevField, vezeteknevField,
+                szulidoField, magyarCheckBox, kulfoldiCheckBox,
+                ertekField, klubidField, posztidField, submitButton
+        );
+
+        root.setCenter(formLayout);
+
+        // Add action to submit button
+        submitButton.setOnAction(event -> {
+            int mezszam = Integer.parseInt(mezszamField.getText());
+            String utonev = utonevField.getText();
+            String vezeteknev = vezeteknevField.getText();
+            String szulido = szulidoField.getText();
+            boolean magyar = magyarCheckBox.isSelected();
+            boolean kulfoldi = kulfoldiCheckBox.isSelected();
+            int ertek = Integer.parseInt(ertekField.getText());
+            int klubid = Integer.parseInt(klubidField.getText());
+            int posztid = Integer.parseInt(posztidField.getText());
+
+            // Insert data into database
+            insertLabdarugoToDatabase(mezszam, utonev, vezeteknev, szulido, magyar, kulfoldi, ertek, klubid, posztid);
+
+            // Clear the form fields after submission
+            mezszamField.clear();
+            utonevField.clear();
+            vezeteknevField.clear();
+            szulidoField.clear();
+            magyarCheckBox.setSelected(false);
+            kulfoldiCheckBox.setSelected(false);
+            ertekField.clear();
+            klubidField.clear();
+            posztidField.clear();
+        });
 
         newWindow.setTitle("3. feladat - Ír");
         newWindow.setScene(scene);
         newWindow.show();
     }
+
+    private void insertLabdarugoToDatabase(int mezszam, String utonev, String vezeteknev, String szulido,
+                                           boolean magyar, boolean kulfoldi, int ertek, int klubid, int posztid) {
+        String sql = "INSERT INTO labdarugo (mezszam, utonev, vezeteknev, szulido, magyar, kulfoldi, ertek, klubid, posztid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, mezszam);
+            pstmt.setString(2, utonev);
+            pstmt.setString(3, vezeteknev);
+            pstmt.setString(4, szulido);
+            pstmt.setBoolean(5, magyar);
+            pstmt.setBoolean(6, kulfoldi);
+            pstmt.setInt(7, ertek);
+            pstmt.setInt(8, klubid);
+            pstmt.setInt(9, posztid);
+
+            pstmt.executeUpdate();
+            System.out.println("New record added successfully.");
+
+        } catch (SQLException e) {
+            System.out.println("Error inserting data: " + e.getMessage());
+        }
+    }
+
 
     public void modositItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
