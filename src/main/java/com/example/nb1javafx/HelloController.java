@@ -1,6 +1,7 @@
 package com.example.nb1javafx;
 
 import com.soapclient.SoapController;
+import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -17,12 +18,23 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.oanda.v20.account.AccountSummary;
 
+import java.io.ByteArrayInputStream;
 import java.sql.*;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
 import javafx.geometry.Insets;
+
+
+
+import csomag1.MNBArfolyamServiceSoap;
+import org.example.Main;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class HelloController {
     @FXML
@@ -685,8 +697,10 @@ public class HelloController {
     }
 
 
+
+
     @FXML
-    public void letoltesItem(ActionEvent actionEvent) {
+    public void letoltesItem(ActionEvent actionEvent) throws MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage {
         Stage newWindow = new Stage();
 
         BorderPane root = new BorderPane();
@@ -694,12 +708,30 @@ public class HelloController {
 
         Label label = new Label();
 
+        try {
+            MNBArfolyamServiceSoap service = Main.getService();
+            String xmlResponse = service.getCurrencies();
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes()));
+
+            NodeList currencyNodes = document.getElementsByTagName("Curr");
+            StringBuilder formattedCurrencies = new StringBuilder("Available Currencies:\n");
+            for (int i = 0; i < currencyNodes.getLength(); i++) {
+                formattedCurrencies.append("- ").append(currencyNodes.item(i).getTextContent()).append("\n");
+            }
+
+            label.setText(formattedCurrencies.toString());
+        } catch (Exception e) {
+            label.setText("Error: " + e.toString());
+        }
 
         VBox vBox = new VBox(15);
         vBox.setPadding(new Insets(20));
-
         vBox.getChildren().addAll(label);
 
+        root.setCenter(vBox);
 
         newWindow.setTitle("2. feladat - Letöltés");
         newWindow.setScene(scene);
