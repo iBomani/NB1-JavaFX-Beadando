@@ -1,10 +1,9 @@
 package com.example.nb1javafx;
 
 import com.oanda.v20.instrument.Candlestick;
+import com.oanda.v20.instrument.InstrumentCandlesResponse;
 import csomag1.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
 import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -30,7 +29,6 @@ import com.oanda.v20.account.AccountSummary;
 import java.io.*;
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javafx.scene.text.Font;
@@ -50,8 +48,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import static com.oanda.v20.instrument.CandlestickGranularity.H1;
 
 public class HelloController {
     @FXML
@@ -1142,76 +1138,115 @@ public class HelloController {
         newWindow.setScene(scene);
         newWindow.show();
     }
-    private TableView<Candlestick> table;
-    private LineChart<String, Number> lineChart;
     @FXML
-    public void historikusarakItem(ActionEvent actionEvent){
-        Stage primaryStage= new Stage();
-        primaryStage.setTitle("Forex Árfolyamok");
+    public void historikusarakItem(ActionEvent actionEvent) {
+        Stage newWindow = new Stage();
 
-        
-        ComboBox<String> currencyPairDropdown = new ComboBox<>();
-        currencyPairDropdown.getItems().addAll("EUR_USD", "GBP_USD", "USD_JPY");
-        currencyPairDropdown.setValue("EUR_USD");
+        // VBox with spacing and padding
+        VBox vBox = new VBox(15);
+        vBox.setPadding(new Insets(20));
+        vBox.setAlignment(Pos.CENTER);
 
-      
-        DatePicker startDatePicker = new DatePicker(LocalDate.now().minusDays(10));
-        DatePicker endDatePicker = new DatePicker(LocalDate.now());
+        // Set up input fields with prompt texts
+        TextField instrumentField = new TextField("EUR_USD");
+        instrumentField.setPromptText("Devizák (pl.: EUR_USD)");
+        instrumentField.setMaxWidth(200);  // Setting width for neat alignment
 
-        
-        table = new TableView<>();
-        TableColumn<Candlestick, String> dateColumn = new TableColumn<>("Időpont");
-        dateColumn.setCellValueFactory(data -> new SimpleStringProperty());
+        DatePicker fromDatePicker = new DatePicker();
+        fromDatePicker.setPromptText("Mettől");
+        fromDatePicker.setMaxWidth(150);
 
-        TableColumn<Candlestick, Double> priceColumn = new TableColumn<>("Árfolyam");
-        priceColumn.setCellValueFactory(data -> new SimpleDoubleProperty().asObject());
+        DatePicker toDatePicker = new DatePicker();
+        toDatePicker.setPromptText("Meddig");
+        toDatePicker.setMaxWidth(150);
 
-        table.getColumns().addAll(dateColumn, priceColumn);
+        // Create a button with styling
+        Button showGraph = new Button("Grafikon megjelenítése");
+        showGraph.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px;");
+        showGraph.setOnAction(e -> showCandlestickChart(new oandaController(), instrumentField, fromDatePicker, toDatePicker));
 
-      
-        CategoryAxis xAxis = new CategoryAxis();
-        NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Időpont");
-        yAxis.setLabel("Árfolyam");
-        lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setTitle("Árfolyamok időbeli alakulása");
+        // Add all elements to the layout
+        vBox.getChildren().addAll(instrumentField, fromDatePicker, toDatePicker, showGraph);
 
-      
-        Button fetchButton = new Button("Adatok lekérése");
-        fetchButton.setOnAction(event -> {
-            String instrument = currencyPairDropdown.getValue();
-            LocalDate startDate = startDatePicker.getValue();
-            LocalDate endDate = endDatePicker.getValue();
-            List<Candlestick> candlesticks = oandaController.getCandlestickData(instrument, H1, startDate, endDate);
-            updateTableAndChart(candlesticks);
-        });
-
-
-        VBox vbox = new VBox(10, currencyPairDropdown, startDatePicker, endDatePicker, fetchButton, table, lineChart);
-        vbox.setPadding(new Insets(15));
-        Scene scene = new Scene(vbox, 800, 600);
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        // Scene and stage setup
+        Scene scene = new Scene(vBox, 400, 300);
+        newWindow.setTitle("3. feladat - Historikus árak");
+        newWindow.setScene(scene);
+        newWindow.show();
     }
 
-    private void updateTableAndChart(List<Candlestick> candlesticks) {
-        ObservableList<Candlestick> tableData = FXCollections.observableArrayList(candlesticks);
-        table.setItems(tableData);
+    private void showCandlestickChart(oandaController oc, TextField instrumentField, DatePicker fromDatePicker, DatePicker toDatePicker) {
 
+        InstrumentCandlesResponse resp = oc.historikusArak(instrumentField.getText(), String.valueOf(fromDatePicker.getValue()), String.valueOf(toDatePicker.getValue()));
 
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        for (Candlestick candle : candlesticks) {
-            String time = String.valueOf(candle.getTime());
-            Double price = candle.getMid().getC().doubleValue();
-            series.getData().add(new XYChart.Data<>(time, price));
+        // Check for valid data
+        if (resp == null || resp.getCandles() == null || resp.getCandles().isEmpty()) {
+            System.out.println("No data available to display.");
+            return;
         }
 
-        lineChart.getData().clear();
-        lineChart.getData().add(series);
+        double minPrice = Double.MAX_VALUE;
+        double maxPrice = Double.MIN_VALUE;
+
+        for (Candlestick candle : resp.getCandles()) {
+            double openPrice = candle.getMid().getO().doubleValue();
+            double highPrice = candle.getMid().getH().doubleValue();
+            double lowPrice = candle.getMid().getL().doubleValue();
+            double closePrice = candle.getMid().getC().doubleValue();
+
+            minPrice = Math.min(minPrice, Math.min(Math.min(openPrice, highPrice), Math.min(lowPrice, closePrice)));
+            maxPrice = Math.max(maxPrice, Math.max(Math.max(openPrice, highPrice), Math.max(lowPrice, closePrice)));
+        }
+
+        double buffer = (maxPrice - minPrice) * 0.05;
+        minPrice -= buffer;
+        maxPrice += buffer;
+
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Dátum & Idő");
+
+        NumberAxis yAxis = new NumberAxis(minPrice, maxPrice, (maxPrice - minPrice) / 10);
+        yAxis.setLabel("Ár");
+
+        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Candlestick árak");
+
+        XYChart.Series<String, Number> openSeries = new XYChart.Series<>();
+        openSeries.setName("Open");
+
+        XYChart.Series<String, Number> highSeries = new XYChart.Series<>();
+        highSeries.setName("High");
+
+        XYChart.Series<String, Number> lowSeries = new XYChart.Series<>();
+        lowSeries.setName("Low");
+
+        XYChart.Series<String, Number> closeSeries = new XYChart.Series<>();
+        closeSeries.setName("Close");
+
+        for (Candlestick candle : resp.getCandles()) {
+            String dateTime = candle.getTime().toString().substring(0, 16);
+
+            double openPrice = candle.getMid().getO().doubleValue();
+            double highPrice = candle.getMid().getH().doubleValue();
+            double lowPrice = candle.getMid().getL().doubleValue();
+            double closePrice = candle.getMid().getC().doubleValue();
+
+            openSeries.getData().add(new XYChart.Data<>(dateTime, openPrice));
+            highSeries.getData().add(new XYChart.Data<>(dateTime, highPrice));
+            lowSeries.getData().add(new XYChart.Data<>(dateTime, lowPrice));
+            closeSeries.getData().add(new XYChart.Data<>(dateTime, closePrice));
+        }
+
+        lineChart.getData().addAll(openSeries, highSeries, lowSeries, closeSeries);
+
+        Stage stage = new Stage();
+        VBox vbox = new VBox(lineChart);
+        Scene scene = new Scene(vbox, 800, 600);
+
+        stage.setScene(scene);
+        stage.setTitle("Candlestick Ár Grafikon");
+        stage.show();
     }
-
-
-
 
     @FXML
     public void pozicionyitasItem(ActionEvent actionEvent){
