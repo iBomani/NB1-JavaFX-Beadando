@@ -809,7 +809,18 @@ public class HelloController {
     }
     @FXML
     public void aktualisarakItem(ActionEvent actionEvent){
+        Stage newWindow = new Stage();
+        BorderPane root = new BorderPane();
 
+
+        final oandaController oc = new oandaController();
+        Label label = new Label();
+        label.setText(oc.aktualisarak());
+        VBox vBox = new VBox(label);
+        Scene scene = new Scene(vBox, 600, 400);
+        newWindow.setTitle("4. feladat - Aktuálisárak");
+        newWindow.setScene(scene);
+        newWindow.show();
     }
     @FXML
     public void historikusarakItem(ActionEvent actionEvent){
