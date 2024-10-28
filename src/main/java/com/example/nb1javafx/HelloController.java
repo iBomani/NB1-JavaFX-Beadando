@@ -23,6 +23,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import com.oanda.v20.account.AccountSummary;
 
@@ -1214,7 +1215,53 @@ public class HelloController {
 
     @FXML
     public void pozicionyitasItem(ActionEvent actionEvent){
+        Stage primaryStage= new Stage();
+        primaryStage.setTitle("Pozíció Nyitás");
 
+
+        Text welcomeText = new Text("Pozíció Nyitás");
+
+        ComboBox<String> currencyPairComboBox = new ComboBox<>();
+        currencyPairComboBox.getItems().addAll("AUD_USD", "EUR_USD", "GBP_USD");
+        currencyPairComboBox.setPromptText("Válassz devizapárt");
+
+        ComboBox<Integer> quantityComboBox = new ComboBox<>();
+        quantityComboBox.getItems().addAll(1, 5, 10, 20);
+        quantityComboBox.setPromptText("Válassz mennyiséget");
+
+        Button buyButton = new Button("Vétel");
+        Button sellButton = new Button("Eladás");
+
+
+        buyButton.setOnAction(event -> {
+            String selectedPair = currencyPairComboBox.getValue();
+            Integer selectedQuantity = quantityComboBox.getValue();
+            if (selectedPair != null && selectedQuantity != null) {
+                String result = oandaController.Nyitás(selectedPair, selectedQuantity, true);
+                welcomeText.setText(welcomeText.getText() + "\n" + result);
+            } else {
+                welcomeText.setText("Kérjük, válasszon ki mindent!");
+            }
+        });
+
+        sellButton.setOnAction(event -> {
+            String selectedPair = currencyPairComboBox.getValue();
+            Integer selectedQuantity = quantityComboBox.getValue();
+            if (selectedPair != null && selectedQuantity != null) {
+                String result = oandaController.Nyitás(selectedPair, selectedQuantity, false);
+                welcomeText.setText(welcomeText.getText() + "\n" + result);
+            } else {
+                welcomeText.setText("Kérjük, válasszon ki mindent!");
+            }
+        });
+
+
+        VBox vbox = new VBox(10, welcomeText, currencyPairComboBox, quantityComboBox, buyButton, sellButton);
+        vbox.setPadding(new javafx.geometry.Insets(15));
+
+        Scene scene = new Scene(vbox, 300, 200);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
     @FXML
     public void poziciozarasItem(ActionEvent actionEvent){

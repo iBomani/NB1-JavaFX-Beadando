@@ -6,6 +6,9 @@ import com.oanda.v20.instrument.Candlestick;
 import com.oanda.v20.instrument.CandlestickGranularity;
 import com.oanda.v20.instrument.InstrumentCandlesRequest;
 import com.oanda.v20.instrument.InstrumentCandlesResponse;
+import com.oanda.v20.order.MarketOrderRequest;
+import com.oanda.v20.order.OrderCreateRequest;
+import com.oanda.v20.order.OrderCreateResponse;
 import com.oanda.v20.pricing.ClientPrice;
 import com.oanda.v20.pricing.PricingGetRequest;
 import com.oanda.v20.pricing.PricingGetResponse;
@@ -80,5 +83,29 @@ public class oandaController {
         }
         return candleDataList;
     }
+    public static String Nyitás(String instrumentCode, Integer units, boolean isBuy) {
+        String message = "Hiba történt a pozíció nyitása során.";
+        try {
 
+            Context ctx = new ContextBuilder("https://api-fxpractice.oanda.com")
+                    .setToken("0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b")
+                    .setApplication("StepByStepOrder")
+                    .build();
+            AccountID accountId = new AccountID("101-004-30186452-001");
+
+            OrderCreateRequest request = new OrderCreateRequest(accountId);
+            MarketOrderRequest marketOrderRequest = new MarketOrderRequest();
+            marketOrderRequest.setInstrument(new InstrumentName(instrumentCode));
+            marketOrderRequest.setUnits(isBuy ? units : -units); //
+            request.setOrder(marketOrderRequest);
+
+            OrderCreateResponse response = ctx.order.create(request);
+            String tradeId = String.valueOf(response.getOrderFillTransaction().getId());
+            message = "Sikeresen nyitott pozíció! Trade ID: " + tradeId; //
+        } catch (Exception e) {
+            e.printStackTrace();
+            message = "Hiba: " + e.getMessage();
+        }
+        return message;
+    }
 }
