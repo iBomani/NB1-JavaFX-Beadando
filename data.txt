@@ -1,0 +1,20 @@
+Currencies:
+Available Currencies: HUF, EUR, AUD, BGN, BRL, CAD, CHF, CNY, CZK, DKK, GBP, HKD, HRK, IDR, ILS, INR, ISK, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PLN, RON, RSD, RUB, SEK, SGD, THB, TRY, UAH, USD, ZAR, ATS, AUP, BEF, BGL, CSD, CSK, DDM, DEM, EEK, EGP, ESP, FIM, FRF, GHP, GRD, IEP, ITL, KPW, KWD, LBP, LTL, LUF, LVL, MNT, NLG, OAL, OBL, OFR, ORB, PKR, PTE, ROL, SDP, SIT, SKK, SUR, VND, XEU, XTR, YUD</Currencies></MNBCurrencies>
+
+Current Exchange Rates:
+Date: 2024-10-28", Rate: <Rate unit="1" curr="EUR">404,45
+Date: 2024-10-25", Rate: <Rate unit="1" curr="EUR">404,20000
+Date: 2024-10-24", Rate: <Rate unit="1" curr="EUR">402,69
+Date: 2024-10-22", Rate: <Rate unit="1" curr="EUR">400,87
+Date: 2024-10-21", Rate: <Rate unit="1" curr="EUR">401,54000
+Date: 2024-10-18", Rate: <Rate unit="1" curr="EUR">400,05
+Date: 2024-10-17", Rate: <Rate unit="1" curr="EUR">401,66
+Date: 2024-10-16", Rate: <Rate unit="1" curr="EUR">400,58
+Date: 2024-10-15", Rate: <Rate unit="1" curr="EUR">400,37
+Date: 2024-10-14", Rate: <Rate unit="1" curr="EUR">400,91
+
+
+Currency Units:
+Currency: HUF, Unit: 1
+
+
