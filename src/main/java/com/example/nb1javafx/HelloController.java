@@ -1,5 +1,7 @@
 package com.example.nb1javafx;
 
+import com.oanda.v20.instrument.Candlestick;
+import com.oanda.v20.instrument.InstrumentCandlesResponse;
 import csomag1.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
 import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
 import javafx.collections.FXCollections;
@@ -20,6 +22,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import com.oanda.v20.account.AccountSummary;
 

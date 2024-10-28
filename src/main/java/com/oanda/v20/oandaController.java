@@ -91,29 +91,6 @@ public class oandaController {
         return null;
     }
 
-    public static List<Candlestick> getCandlestickData(String instrument, CandlestickGranularity granularity, LocalDate startDate, LocalDate endDate) {
-        List<Candlestick> candleDataList = new ArrayList<>();
-        try {
-            Context ctx = new ContextBuilder("https://api-fxpractice.oanda.com")
-                    .setToken("0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b")
-                    .setApplication("HistorikusAdatok")
-                    .build();
-
-            InstrumentCandlesRequest request = new InstrumentCandlesRequest(new InstrumentName(instrument));
-            request.setGranularity(granularity);
-            request.setCount(10L);
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            request.setFrom(dateFormat.format(java.sql.Date.valueOf(startDate)));
-            request.setTo(dateFormat.format(java.sql.Date.valueOf(endDate)));
-
-            InstrumentCandlesResponse resp = ctx.instrument.candles(request);
-            candleDataList.addAll(resp.getCandles());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return candleDataList;
-    }
     public static String Nyitás(String instrumentCode, Integer units, boolean isBuy) {
         String message = "Hiba történt a pozíció nyitása során.";
         try {
@@ -141,4 +118,3 @@ public class oandaController {
     }
 }
 
-}
