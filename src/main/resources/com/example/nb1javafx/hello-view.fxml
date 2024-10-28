@@ -25,7 +25,7 @@
                     <items>
                         <MenuItem text="Letöltés" onAction="#letoltesItem"/>
                         <MenuItem text="Letöltés2" onAction="#letoltes2Item"/>
-                        <MenuItem text="Grafikon"/>
+                        <MenuItem text="Grafikon" onAction="#grafikonItem"/>
                     </items>
                 </Menu>
 

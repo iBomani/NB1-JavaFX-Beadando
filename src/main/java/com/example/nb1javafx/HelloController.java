@@ -9,6 +9,10 @@ import javafx.fxml.FXML;
 import com.oanda.v20.oandaController;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -19,14 +23,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.oanda.v20.account.AccountSummary;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -39,6 +39,7 @@ import csomag1.MNBArfolyamServiceSoap;
 import org.example.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -841,6 +842,105 @@ public class HelloController {
     }
 
 
+    public void grafikonItem(ActionEvent actionEvent) {
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("2. feladat - Letöltés2");
+
+        Label label = new Label("Árfolyam grafikon");
+        label.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        label.setTextFill(Color.DARKSLATEBLUE);
+
+
+        ComboBox<String> currencyField = new ComboBox<>();
+        currencyField.getItems().addAll(getCurrencies());
+        currencyField.setPromptText("Valuta");
+        currencyField.setMaxWidth(300);
+        currencyField.setStyle("-fx-font-size: 14px;");
+
+        DatePicker fromDatePicker = new DatePicker();
+        fromDatePicker.setPromptText("Mettől");
+        fromDatePicker.setStyle("-fx-font-size: 14px;");
+        fromDatePicker.setMaxWidth(300);
+
+        DatePicker toDatePicker = new DatePicker();
+        toDatePicker.setPromptText("Meddig");
+        toDatePicker.setStyle("-fx-font-size: 14px;");
+        toDatePicker.setMaxWidth(300);
+
+        Button saveButton = new Button("Grafikon megjelenítése");
+        saveButton.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        saveButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 8px 16px;");
+        saveButton.setOnAction(e -> showGraph(toDictionary(currencyField.getValue(), fromDatePicker.getValue(), toDatePicker.getValue())));
+
+        VBox vbox = new VBox(15, label, currencyField, fromDatePicker, toDatePicker, saveButton);
+        vbox.setPadding(new Insets(30, 30, 30, 30));
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setStyle("-fx-background-color: #F9F9F9;");
+
+        Scene scene = new Scene(vbox, 400, 400);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void showGraph(Dictionary<String, Double> dictionary) {
+        Stage graphStage = new Stage();
+        graphStage.setTitle("2. feladat - Árfolyam grafikon");
+
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Dátum");
+
+        Enumeration<Double> rates = dictionary.elements();
+        double minRate = Collections.min(Collections.list(rates));
+        double maxRate = Collections.max(Collections.list(dictionary.elements()));
+
+        NumberAxis yAxis = new NumberAxis(minRate - 1, maxRate + 1, 0.2);
+        yAxis.setLabel("Árfolyam");
+        LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Árfolyam grafikon");
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Árfolyam");
+
+
+        dictionary.keys().asIterator().forEachRemaining(date -> {
+            series.getData().add(new XYChart.Data<>(date, dictionary.get(date)));
+        });
+
+        lineChart.getData().add(series);
+
+        Scene scene = new Scene(lineChart, 800, 600);
+        graphStage.setScene(scene);
+        graphStage.show();
+    }
+
+    private Dictionary<String, Double> toDictionary(String currency, LocalDate fromDate, LocalDate toDate) {
+        MNBArfolyamServiceSoap service = Main.getService();
+        Dictionary<String, Double> dictionary = new Hashtable<>();
+        try {
+            String exchangeRatesXML = service.getExchangeRates(fromDate.toString(), toDate.toString(), currency);
+
+            String exchangeRates = formatExchangeRates(exchangeRatesXML);
+
+            String[] lines = exchangeRates.split("\n");
+
+
+            for (String line : lines) {
+                String date = line.substring(line.indexOf("Date: ") + 6, line.indexOf("\", Rate:"));
+                String rateStr = line.substring(line.indexOf(">") + 1).trim();
+                rateStr = rateStr.replace(",", ".");
+
+                double rate = Double.parseDouble(rateStr);
+                dictionary.put(date, rate);
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.toString());
+        }
+
+        return dictionary;
+    }
+
+
     public List<String> getCurrencies() {
         List<String> currencies = new ArrayList<>();
         try {
@@ -1051,4 +1151,5 @@ public class HelloController {
     public void nyitottpoziciokItem(ActionEvent actionEvent){
 
     }
+
 }
