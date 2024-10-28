@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import com.oanda.v20.oandaController;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -788,13 +790,9 @@ public class HelloController {
     }
     @FXML
     public void szamlainformaciokItem(ActionEvent actionEvent){
-        Context ctx = new Context("https://api-fxtrade.oanda.com", "2bb0866d8f6efc3d3e0da03f857e3de0-cb4a5e21621756aa522dde7252aa352d");
-        try {
-            AccountSummary summary = ctx.account.summary(new AccountID("101-004-30186452-001")).getAccount();
-            System.out.println(summary);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        final oandaController oc = new oandaController();
+        String data=oc.skibidi();
+        System.out.println(data);
     }
     @FXML
     public void aktualisarakItem(ActionEvent actionEvent){
