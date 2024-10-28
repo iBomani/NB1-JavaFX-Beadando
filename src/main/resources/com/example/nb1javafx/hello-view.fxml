@@ -24,7 +24,7 @@
                 <Menu text="SoapKliens">
                     <items>
                         <MenuItem text="Letöltés" onAction="#letoltesItem"/>
-                        <MenuItem text="Letöltés2"/>
+                        <MenuItem text="Letöltés2" onAction="#letoltes2Item"/>
                         <MenuItem text="Grafikon"/>
                     </items>
                 </Menu>

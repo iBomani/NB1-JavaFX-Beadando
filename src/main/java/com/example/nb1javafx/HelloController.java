@@ -1,12 +1,13 @@
 package com.example.nb1javafx;
 
-import com.soapclient.SoapController;
+import csomag1.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
 import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import com.oanda.v20.oandaController;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -21,8 +22,11 @@ import com.oanda.v20.account.AccountSummary;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -32,13 +36,14 @@ import javafx.geometry.Insets;
 
 
 import csomag1.MNBArfolyamServiceSoap;
-import net.bytebuddy.asm.Advice;
 import org.example.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class HelloController {
     @FXML
@@ -710,11 +715,19 @@ public class HelloController {
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 600, 400);
 
-        Label label = new Label();
+        Label titleLabel = new Label("Valuta letöltés");
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 24));
+        titleLabel.setTextFill(Color.DARKSLATEGRAY);
+        titleLabel.setAlignment(Pos.CENTER);
 
-        label.setText("Elérhető valuták, 2 heti árfolyamok és valuta egységek letöltése.");
-        Button button = new Button("Letöltés");
-        button.setOnAction(event -> {
+        Label instructionLabel = new Label("Elérhető valuták, 2 heti árfolyamok és valuta egységek letöltése.");
+        instructionLabel.setFont(Font.font("Arial", 16));
+        instructionLabel.setTextFill(Color.GRAY);
+
+        Button downloadButton = new Button("Letöltés");
+        downloadButton.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        downloadButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 8px 16px;");
+        downloadButton.setOnAction(event -> {
             try {
                 MNBArfolyamServiceSoap service = Main.getService();
                 String currenciesXML = service.getCurrencies();
@@ -734,26 +747,126 @@ public class HelloController {
 
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter("data.txt"))) {
                     writer.write(data);
-                    writer.flush();
                 }
 
-                System.out.println("Adatok sikeresen letöltve: data.txt");
+                instructionLabel.setText("Adatok sikeresen letöltve: data.txt");
             } catch (Exception e) {
-                label.setText("Error: " + e.toString());
+                instructionLabel.setText("Error: " + e.toString());
             }
         });
 
+        VBox contentBox = new VBox(20, titleLabel, instructionLabel, downloadButton);
+        contentBox.setPadding(new Insets(30, 50, 30, 50));
+        contentBox.setAlignment(Pos.CENTER);
 
-        VBox vBox = new VBox(15);
-        vBox.setPadding(new Insets(20));
-        vBox.getChildren().addAll(label, button);
-
-        root.setCenter(vBox);
+        root.setCenter(contentBox);
+        root.setStyle("-fx-background-color: #F5F5F5; -fx-border-width: 2px; -fx-border-color: #DDDDDD;");
 
         newWindow.setTitle("2. feladat - Letöltés");
         newWindow.setScene(scene);
         newWindow.show();
     }
+
+    public void letoltes2Item(ActionEvent actionEvent) throws MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage {
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("2. feladat - Letöltés2");
+
+        Label label = new Label("Fájl neve:");
+        label.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        label.setTextFill(Color.DARKSLATEBLUE);
+
+        TextArea textArea = new TextArea();
+        textArea.setMaxSize(300, 25);
+        textArea.setFont(Font.font("Arial", 14));
+        textArea.setPromptText("Adja meg a fájl nevét");
+
+        ComboBox<String> currencyField = new ComboBox<>();
+        currencyField.getItems().addAll(getCurrencies());
+        currencyField.setPromptText("Valuta");
+        currencyField.setMaxWidth(300);
+        currencyField.setStyle("-fx-font-size: 14px;");
+
+        DatePicker fromDatePicker = new DatePicker();
+        fromDatePicker.setPromptText("Mettől");
+        fromDatePicker.setStyle("-fx-font-size: 14px;");
+        fromDatePicker.setMaxWidth(300);
+
+        DatePicker toDatePicker = new DatePicker();
+        toDatePicker.setPromptText("Meddig");
+        toDatePicker.setStyle("-fx-font-size: 14px;");
+        toDatePicker.setMaxWidth(300);
+
+        Button saveButton = new Button("Adatok letöltése");
+        saveButton.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 14));
+        saveButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 8px 16px;");
+        saveButton.setOnAction(e -> saveData(textArea.getText(), currencyField.getValue(), fromDatePicker.getValue(), toDatePicker.getValue()));
+
+        VBox vbox = new VBox(15, label, textArea, currencyField, fromDatePicker, toDatePicker, saveButton);
+        vbox.setPadding(new Insets(30, 30, 30, 30));
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setStyle("-fx-background-color: #F9F9F9;");
+
+        Scene scene = new Scene(vbox, 400, 350);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+    }
+
+    private void saveData(String filename, String value, LocalDate fromDatePickerValue, LocalDate toDatePickerValue) {
+            MNBArfolyamServiceSoap service = Main.getService();
+            try {
+                System.out.println(fromDatePickerValue.toString());
+                System.out.println(toDatePickerValue.toString());
+                System.out.println(value);
+                String exchangeRatesXML = service.getExchangeRates(fromDatePickerValue.toString(), toDatePickerValue.toString(), value);
+                System.out.println(exchangeRatesXML);
+                String currencyUnitsXML = service.getCurrencyUnits(value);
+
+                String exchangeRates = formatExchangeRates(exchangeRatesXML);
+                String currencyUnits = formatCurrencyUnits(currencyUnitsXML);
+
+                String data = "HUF - " + value + "\n\n" + "Árfolyamok::\n" + exchangeRates + "\n\n" +
+                        "Valuta egység:\n" + currencyUnits + "\n\n";
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename + ".txt"))) {
+                    writer.write(data);
+                    writer.flush();
+                }
+
+                System.out.println("Adatok sikeresen letöltve: " + filename);
+            } catch (Exception e) {
+                System.out.println("Error: " + e.toString());
+            }
+    }
+
+
+    public List<String> getCurrencies() {
+        List<String> currencies = new ArrayList<>();
+        try {
+            MNBArfolyamServiceSoap service = Main.getService();
+            String xml = service.getCurrencies();
+
+            try {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes()));
+
+                NodeList nodeList = doc.getElementsByTagName("Curr");
+                for (int i = 0; i < nodeList.getLength(); i++) {
+                    currencies.add(nodeList.item(i).getTextContent());
+                }
+            } catch (ParserConfigurationException | IOException | SAXException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage e) {
+            e.printStackTrace();
+        }
+        currencies.remove("HUF");
+        return currencies;
+    }
+
+
 
     private String formatCurrencyUnits(String xml) {
         StringBuilder formattedUnits = new StringBuilder();
