@@ -18,6 +18,7 @@ module com.example.nb1javafx {
     requires java.jws;
     requires java.xml.ws;
     requires java.desktop;
+    requires v20;
 
     opens com.example.nb1javafx to javafx.fxml;
     exports com.example.nb1javafx;
