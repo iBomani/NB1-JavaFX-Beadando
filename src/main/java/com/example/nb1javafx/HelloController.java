@@ -1,11 +1,11 @@
 package com.example.nb1javafx;
 
+import com.soapclient.SoapController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import com.oanda.v20.oandaController;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -15,20 +15,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import soapmnb.MNBArfolyamServiceSoap;
-import soapmnb.MNBArfolyamServiceSoapImpl;
-import com.oanda.v20.account.AccountID;
 import com.oanda.v20.account.AccountSummary;
 
 import java.sql.*;
-import com.oanda.v20.Context;
-import com.oanda.v20.ContextBuilder;
+
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
 import javafx.geometry.Insets;
-
-import javax.swing.*;
 
 public class HelloController {
     @FXML
@@ -698,19 +692,13 @@ public class HelloController {
         BorderPane root = new BorderPane();
         Scene scene = new Scene(root, 600, 400);
 
-        MNBArfolyamServiceSoapImpl impl = new MNBArfolyamServiceSoapImpl();
-        MNBArfolyamServiceSoap service = impl.getCustomBindingMNBArfolyamServiceSoap();
+        Label label = new Label();
 
-        try {
-            System.out.println("VALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMIVALAMI AVLAMI");
-            String resp = service.getExchangeRates("2021-04-01", "2021-04-30", "EUR");
-            Label label = new Label(resp);
-            root.setCenter(label);
 
-        } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
-            e.printStackTrace();
-        }
+        VBox vBox = new VBox(15);
+        vBox.setPadding(new Insets(20));
+
+        vBox.getChildren().addAll(label);
 
 
         newWindow.setTitle("2. feladat - Letöltés");
@@ -796,16 +784,35 @@ public class HelloController {
         Stage newWindow = new Stage();
         BorderPane root = new BorderPane();
 
-
         final oandaController oc = new oandaController();
-        Label label = new Label();
-        label.setText(oc.skibidi().toString());
-        VBox vBox = new VBox(label);
+        AccountSummary accountSummary = oc.skibidi();
+
+        VBox vBox = new VBox(15);
+        vBox.setStyle("-fx-padding: 20; -fx-background-color: #f9f9f9;");
+
+        Label headerLabel = new Label(" -- Számla információk -- ");
+        headerLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;");
+
+        Label idLabel = new Label("ID: " + accountSummary.getId());
+        Label aliasLabel = new Label("Alias: " + accountSummary.getAlias());
+        Label currencyLabel = new Label("Currency: " + accountSummary.getCurrency());
+        Label balanceLabel = new Label("Balance: " + accountSummary.getBalance());
+        Label createdByUserIDLabel = new Label("Created By User ID: " + accountSummary.getCreatedByUserID());
+        Label createdTimeLabel = new Label("Created Time: " + accountSummary.getCreatedTime());
+
+        idLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+        aliasLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+        currencyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+        balanceLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+        createdByUserIDLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+        createdTimeLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+
+        vBox.getChildren().addAll(headerLabel, idLabel, aliasLabel, currencyLabel, balanceLabel, createdByUserIDLabel, createdTimeLabel);
+
         Scene scene = new Scene(vBox, 600, 400);
         newWindow.setTitle("4. feladat - Számlainformációk");
         newWindow.setScene(scene);
         newWindow.show();
-
     }
     @FXML
     public void aktualisarakItem(ActionEvent actionEvent){

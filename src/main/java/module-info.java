@@ -21,7 +21,7 @@ module com.example.nb1javafx {
     requires gson;
     requires httpcore;
     requires httpclient;
-
+    requires HegesztesSoapMNB;
 
     opens com.example.nb1javafx to javafx.fxml;
 
@@ -40,5 +40,7 @@ module com.example.nb1javafx {
     exports com.oanda.v20.pricing_common;
     exports com.oanda.v20.order;
     exports com.oanda.v20.trade;
+    exports com.soapclient;
+    opens com.soapclient to javafx.fxml;
 
 }
