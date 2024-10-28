@@ -28,6 +28,8 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
 import javafx.geometry.Insets;
 
+import javax.swing.*;
+
 public class HelloController {
     @FXML
     private TableView<Labdarugo> tableView;
@@ -788,11 +790,22 @@ public class HelloController {
         thread1.start();
         thread2.start();
     }
+
     @FXML
     public void szamlainformaciokItem(ActionEvent actionEvent){
+        Stage newWindow = new Stage();
+        BorderPane root = new BorderPane();
+
+
         final oandaController oc = new oandaController();
-        String data=oc.skibidi();
-        System.out.println(data);
+        Label label = new Label();
+        label.setText(oc.skibidi().toString());
+        VBox vBox = new VBox(label);
+        Scene scene = new Scene(vBox, 600, 400);
+        newWindow.setTitle("4. feladat - Számlainformációk");
+        newWindow.setScene(scene);
+        newWindow.show();
+
     }
     @FXML
     public void aktualisarakItem(ActionEvent actionEvent){
