@@ -15,6 +15,7 @@ module com.example.nb1javafx {
     requires httpclient;
     requires HegesztesSoapMNB;
     requires gmbal;
+    requires net.bytebuddy;
 
     opens com.example.nb1javafx to javafx.fxml;
 

@@ -18,8 +18,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.oanda.v20.account.AccountSummary;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.FileWriter;
 import java.sql.*;
+import java.time.LocalDate;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -29,6 +32,7 @@ import javafx.geometry.Insets;
 
 
 import csomag1.MNBArfolyamServiceSoap;
+import net.bytebuddy.asm.Advice;
 import org.example.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -708,28 +712,41 @@ public class HelloController {
 
         Label label = new Label();
 
-        try {
-            MNBArfolyamServiceSoap service = Main.getService();
-            String xmlResponse = service.getCurrencies();
+        label.setText("Elérhető valuták, 2 heti árfolyamok és valuta egységek letöltése.");
+        Button button = new Button("Letöltés");
+        button.setOnAction(event -> {
+            try {
+                MNBArfolyamServiceSoap service = Main.getService();
+                String currenciesXML = service.getCurrencies();
 
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(xmlResponse.getBytes()));
+                LocalDate today = LocalDate.now();
+                LocalDate twoWeeksBefore = today.minusWeeks(2);
+                String exchangeRatesXML = service.getExchangeRates(twoWeeksBefore.toString(), today.toString(), "EUR");
+                String currencyUnitsXML = service.getCurrencyUnits("HUF");
 
-            NodeList currencyNodes = document.getElementsByTagName("Curr");
-            StringBuilder formattedCurrencies = new StringBuilder("Available Currencies:\n");
-            for (int i = 0; i < currencyNodes.getLength(); i++) {
-                formattedCurrencies.append("- ").append(currencyNodes.item(i).getTextContent()).append("\n");
+                String currencies = formatCurrencies(currenciesXML);
+                String exchangeRates = formatExchangeRates(exchangeRatesXML);
+                String currencyUnits = formatCurrencyUnits(currencyUnitsXML);
+
+                String data = "Currencies:\n" + currencies + "\n\n" +
+                        "Current Exchange Rates:\n" + exchangeRates + "\n\n" +
+                        "Currency Units:\n" + currencyUnits + "\n\n";
+
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("data.txt"))) {
+                    writer.write(data);
+                    writer.flush();
+                }
+
+                System.out.println("Adatok sikeresen letöltve: data.txt");
+            } catch (Exception e) {
+                label.setText("Error: " + e.toString());
             }
+        });
 
-            label.setText(formattedCurrencies.toString());
-        } catch (Exception e) {
-            label.setText("Error: " + e.toString());
-        }
 
         VBox vBox = new VBox(15);
         vBox.setPadding(new Insets(20));
-        vBox.getChildren().addAll(label);
+        vBox.getChildren().addAll(label, button);
 
         root.setCenter(vBox);
 
@@ -737,6 +754,50 @@ public class HelloController {
         newWindow.setScene(scene);
         newWindow.show();
     }
+
+    private String formatCurrencyUnits(String xml) {
+        StringBuilder formattedUnits = new StringBuilder();
+        String[] units = xml.split("<Unit curr=\"");
+        for (String unit : units) {
+            if (unit.contains("</Unit>")) {
+                String currency = unit.substring(0, unit.indexOf("\">"));
+                String value = unit.substring(unit.indexOf("\">") + 2, unit.indexOf("</Unit>"));
+                formattedUnits.append("Currency: ").append(currency).append(", Unit: ").append(value).append("\n");
+            }
+        }
+        return formattedUnits.toString();
+    }
+
+    private String formatExchangeRates(String xml) {
+        StringBuilder formattedRates = new StringBuilder();
+        String[] rates = xml.split("<Day date=\"");
+        for (String rate : rates) {
+            if (rate.contains("<Rate")) {
+                String date = rate.substring(0, rate.indexOf(">"));
+                String value = rate.substring(rate.indexOf(">") + 1, rate.indexOf("</Rate>"));
+                formattedRates.append("Date: ").append(date).append(", Rate: ").append(value).append("\n");
+            }
+        }
+        return formattedRates.toString();
+    }
+
+    private String formatCurrencies(String xml) {
+        StringBuilder formattedCurrencies = new StringBuilder();
+
+        formattedCurrencies.append("Available Currencies: ");
+        String[] currencies = xml.split("<Curr>");
+        for (String currency : currencies) {
+            if (currency.contains("</Curr>")) {
+                formattedCurrencies.append(currency.replace("</Curr>", "").trim()).append(", ");
+            }
+        }
+
+        if (formattedCurrencies.length() > 0) {
+            formattedCurrencies.setLength(formattedCurrencies.length() - 2);
+        }
+        return formattedCurrencies.toString();
+    }
+
 
     @FXML
     public void parhuzamosItem(ActionEvent actionEvent) {
