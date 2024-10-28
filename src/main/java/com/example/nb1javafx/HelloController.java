@@ -1265,7 +1265,35 @@ public class HelloController {
     }
     @FXML
     public void poziciozarasItem(ActionEvent actionEvent){
+        Stage primaryStage= new Stage();
+        primaryStage.setTitle("Pozíció Zárás");
 
+
+        Text welcomeText = new Text("Pozíció Zárás");
+
+        TextField tradeIdField = new TextField();
+        tradeIdField.setPromptText("Írd be a pozíció ID-ját");
+
+        Button closeButton = new Button("Pozíció Zárás");
+
+
+        closeButton.setOnAction(event -> {
+            String tradeId = tradeIdField.getText();
+            if (tradeId != null && !tradeId.trim().isEmpty()) {
+                String result = oandaController.Zaras(tradeId);
+                welcomeText.setText(welcomeText.getText() + "\n" + result);
+            } else {
+                welcomeText.setText("Kérjük, írd be a pozíció ID-ját!");
+            }
+        });
+
+
+        VBox vbox = new VBox(10, welcomeText, tradeIdField, closeButton);
+        vbox.setPadding(new javafx.geometry.Insets(15));
+
+        Scene scene = new Scene(vbox, 300, 200);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
     @FXML
     public void nyitottpoziciokItem(ActionEvent actionEvent){

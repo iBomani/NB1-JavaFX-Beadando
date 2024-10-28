@@ -14,12 +14,13 @@ import com.oanda.v20.pricing.PricingGetRequest;
 import com.oanda.v20.pricing.PricingGetResponse;
 import com.oanda.v20.primitives.InstrumentName;
 import static com.oanda.v20.instrument.CandlestickGranularity.H1;
-
+import com.oanda.v20.trade.TradeCloseRequest;
+import com.oanda.v20.trade.TradeSpecifier;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 public class oandaController {
@@ -73,8 +74,8 @@ public class oandaController {
             request.setCount(10L);
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-            request.setFrom(dateFormat.format(java.sql.Date.valueOf(startDate)));
-            request.setTo(dateFormat.format(java.sql.Date.valueOf(endDate)));
+            request.setFrom(dateFormat.format(Date.valueOf(startDate)));
+            request.setTo(dateFormat.format(Date.valueOf(endDate)));
 
             InstrumentCandlesResponse resp = ctx.instrument.candles(request);
             candleDataList.addAll(resp.getCandles());
@@ -107,5 +108,20 @@ public class oandaController {
             message = "Hiba: " + e.getMessage();
         }
         return message;
+    }
+    public static String Zaras(String tradeId) {
+        String resultMessage = "Zárás folyamatban...";
+        try {
+            Context ctx = new
+                    ContextBuilder("https://api-fxpractice.oanda.com").setToken("0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b").setApplication("StepByStepOrder").build();
+           
+            AccountID accountId = new AccountID("101-004-30186452-001");
+            ctx.trade.close(new TradeCloseRequest(accountId, new TradeSpecifier(tradeId)));
+            resultMessage = "Trade ID: " + tradeId + " sikeresen lezárva.";
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMessage = "Hiba: " + e.getMessage();
+        }
+        return resultMessage;
     }
 }
