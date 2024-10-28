@@ -13,7 +13,7 @@ import java.util.List;
 public class oandaController {
 
     public AccountSummary skibidi(){
-        Context ctx = new Context("https://api-fxpractice.oanda.com", "c98e58a6077aab45fe95dd3a884c56ee-e2cd6c83e80c34050cde1d86b4ed7a2f");
+        Context ctx = new Context("https://api-fxpractice.oanda.com", "0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b");
         try {
             AccountSummary summary = ctx.account.summary(new
                     AccountID("101-004-30186452-001")).getAccount();
