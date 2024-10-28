@@ -1,7 +1,10 @@
 package com.example.nb1javafx;
 
+import com.oanda.v20.instrument.Candlestick;
 import csomag1.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
 import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -26,6 +29,7 @@ import com.oanda.v20.account.AccountSummary;
 import java.io.*;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javafx.scene.text.Font;
@@ -45,6 +49,8 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import static com.oanda.v20.instrument.CandlestickGranularity.H1;
 
 public class HelloController {
     @FXML
@@ -1135,10 +1141,77 @@ public class HelloController {
         newWindow.setScene(scene);
         newWindow.show();
     }
+    private TableView<Candlestick> table;
+    private LineChart<String, Number> lineChart;
     @FXML
     public void historikusarakItem(ActionEvent actionEvent){
+        Stage primaryStage= new Stage();
+        primaryStage.setTitle("Forex Árfolyamok");
 
+        
+        ComboBox<String> currencyPairDropdown = new ComboBox<>();
+        currencyPairDropdown.getItems().addAll("EUR_USD", "GBP_USD", "USD_JPY");
+        currencyPairDropdown.setValue("EUR_USD");
+
+      
+        DatePicker startDatePicker = new DatePicker(LocalDate.now().minusDays(10));
+        DatePicker endDatePicker = new DatePicker(LocalDate.now());
+
+        
+        table = new TableView<>();
+        TableColumn<Candlestick, String> dateColumn = new TableColumn<>("Időpont");
+        dateColumn.setCellValueFactory(data -> new SimpleStringProperty());
+
+        TableColumn<Candlestick, Double> priceColumn = new TableColumn<>("Árfolyam");
+        priceColumn.setCellValueFactory(data -> new SimpleDoubleProperty().asObject());
+
+        table.getColumns().addAll(dateColumn, priceColumn);
+
+      
+        CategoryAxis xAxis = new CategoryAxis();
+        NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("Időpont");
+        yAxis.setLabel("Árfolyam");
+        lineChart = new LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Árfolyamok időbeli alakulása");
+
+      
+        Button fetchButton = new Button("Adatok lekérése");
+        fetchButton.setOnAction(event -> {
+            String instrument = currencyPairDropdown.getValue();
+            LocalDate startDate = startDatePicker.getValue();
+            LocalDate endDate = endDatePicker.getValue();
+            List<Candlestick> candlesticks = oandaController.getCandlestickData(instrument, H1, startDate, endDate);
+            updateTableAndChart(candlesticks);
+        });
+
+
+        VBox vbox = new VBox(10, currencyPairDropdown, startDatePicker, endDatePicker, fetchButton, table, lineChart);
+        vbox.setPadding(new Insets(15));
+        Scene scene = new Scene(vbox, 800, 600);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
+
+    private void updateTableAndChart(List<Candlestick> candlesticks) {
+        ObservableList<Candlestick> tableData = FXCollections.observableArrayList(candlesticks);
+        table.setItems(tableData);
+
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        for (Candlestick candle : candlesticks) {
+            String time = String.valueOf(candle.getTime());
+            Double price = candle.getMid().getC().doubleValue();
+            series.getData().add(new XYChart.Data<>(time, price));
+        }
+
+        lineChart.getData().clear();
+        lineChart.getData().add(series);
+    }
+
+
+
+
     @FXML
     public void pozicionyitasItem(ActionEvent actionEvent){
 
