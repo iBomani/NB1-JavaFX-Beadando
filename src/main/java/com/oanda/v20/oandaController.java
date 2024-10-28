@@ -12,9 +12,11 @@ public class oandaController {
         try {
             AccountSummary summary = ctx.account.summary(new
                     AccountID("101-004-30186452-001")).getAccount();
-            return summary;
+            return summary.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return "Error";
     }
 }

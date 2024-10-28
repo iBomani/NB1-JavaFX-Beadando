@@ -18,8 +18,27 @@ module com.example.nb1javafx {
     requires java.jws;
     requires java.xml.ws;
     requires java.desktop;
-    requires v20;
+    requires gson;
+    requires httpcore;
+    requires httpclient;
+
 
     opens com.example.nb1javafx to javafx.fxml;
+
     exports com.example.nb1javafx;
+
+    opens com.oanda.v20;
+    opens com.oanda.v20.account;
+    opens com.oanda.v20.pricing;
+    opens com.oanda.v20.pricing_common;
+    opens com.oanda.v20.order;
+    opens com.oanda.v20.instrument;
+    opens com.oanda.v20.transaction;
+    opens com.oanda.v20.trade;
+    exports com.oanda.v20.primitives;
+    exports com.oanda.v20.transaction;
+    exports com.oanda.v20.pricing_common;
+    exports com.oanda.v20.order;
+    exports com.oanda.v20.trade;
+
 }
