@@ -15,10 +15,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import soapmnb.MNBArfolyamServiceSoap;
 import soapmnb.MNBArfolyamServiceSoapImpl;
+import com.oanda.v20.account.AccountID;
+import com.oanda.v20.account.AccountSummary;
 
-import javax.xml.ws.soap.SOAPFaultException;
 import java.sql.*;
-
+import com.oanda.v20.Context;
+import com.oanda.v20.ContextBuilder;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.paint.Color;
@@ -701,9 +703,6 @@ public class HelloController {
             Label label = new Label(resp);
             root.setCenter(label);
 
-        } catch (SOAPFaultException e) {
-            System.out.println("SOAPFaultException: " + e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());
             e.printStackTrace();
@@ -789,7 +788,13 @@ public class HelloController {
     }
     @FXML
     public void szamlainformaciokItem(ActionEvent actionEvent){
-
+        Context ctx = new Context("https://api-fxtrade.oanda.com", "2bb0866d8f6efc3d3e0da03f857e3de0-cb4a5e21621756aa522dde7252aa352d");
+        try {
+            AccountSummary summary = ctx.account.summary(new AccountID("101-004-30186452-001")).getAccount();
+            System.out.println(summary);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     @FXML
     public void aktualisarakItem(ActionEvent actionEvent){
