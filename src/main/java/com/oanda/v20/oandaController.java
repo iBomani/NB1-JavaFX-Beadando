@@ -95,7 +95,7 @@ public class oandaController {
     }
 
     public static String Nyitás(String instrumentCode, Integer units, boolean isBuy) {
-        String message = "Hiba történt a pozíció nyitása során.";
+        String message = "Hiba történt a pozíció nyitása során.:(";
         try {
 
             Context ctx = new ContextBuilder("https://api-fxpractice.oanda.com")
