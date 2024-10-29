@@ -1,14 +1,19 @@
 package com.example.nb1javafx;
 
+import com.oanda.v20.*;
+import com.oanda.v20.account.AccountID;
 import com.oanda.v20.instrument.Candlestick;
 import com.oanda.v20.instrument.InstrumentCandlesResponse;
+import com.oanda.v20.trade.Trade;
 import csomag1.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
 import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import com.oanda.v20.oandaController;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -1330,9 +1335,74 @@ public class HelloController {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+    private TableView<Trade> tradesTable;
+
+    public void NyitotttradekKiír() throws ExecuteException, RequestException {
+        Text welcomeText = new Text("Nyitott tradek");
+
+        Context ctx = new
+                ContextBuilder("https://api-fxpractice.oanda.com").setToken("0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b").setApplication("StepByStepOrder").build();
+        AccountID accountId = new AccountID("101-004-30186452-001");
+        List<Trade> trades = ctx.trade.listOpen(accountId).getTrades();
+
+
+        tradesTable.getItems().clear();
+
+        for (Trade trade : trades) {
+            tradesTable.getItems().add(trade);
+        }
+
+
+        tradesTable.refresh();
+    }
+
     @FXML
     public void nyitottpoziciokItem(ActionEvent actionEvent){
+        Stage primaryStage= new Stage();
+        primaryStage.setTitle("Nyitott Pozíciók");
 
+
+        Text welcomeText = new Text("Nyitott pozicíók");
+
+
+        tradesTable = new TableView<>();
+        TableColumn<Trade, String> idColumn = new TableColumn<>("Trade ID");
+        TableColumn<Trade, String> instrumentColumn = new TableColumn<>("Devizapár");
+        TableColumn<Trade, String> openTimeColumn = new TableColumn<>("Nyitás Ideje");
+        TableColumn<Trade, Number> unitsColumn = new TableColumn<>("Mennyiség");
+        TableColumn<Trade, Number> priceColumn = new TableColumn<>("Ár");
+        TableColumn<Trade, Number> unrealizedPLColumn = new TableColumn<>("Nyereség/veszteség");
+
+        // CellValueFactory beállítása
+        idColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getId())));
+
+        instrumentColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getInstrument().toString()));
+        openTimeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getOpenTime().toString()));
+        unitsColumn.setCellValueFactory(data -> new SimpleIntegerProperty((int) data.getValue().getCurrentUnits().doubleValue()));
+        priceColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPrice().doubleValue()));
+        unrealizedPLColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getUnrealizedPL().doubleValue()));
+
+
+        // Oszlopok hozzáadása
+        tradesTable.getColumns().addAll(idColumn, instrumentColumn, openTimeColumn, unitsColumn, priceColumn, unrealizedPLColumn);
+
+        Button refreshButton = new Button("Nyitott pozíciók frissítése");
+        refreshButton.setOnAction(event -> {
+            try {
+                NyitotttradekKiír();
+            } catch (ExecuteException | RequestException e) {
+                e.printStackTrace();
+                welcomeText.setText(welcomeText.getText() + "\n" + "Hiba: " + e.getMessage());
+            }
+        });
+
+
+        VBox vbox = new VBox(10, welcomeText, tradesTable, refreshButton);
+        vbox.setPadding(new javafx.geometry.Insets(15));
+
+        Scene scene = new Scene(vbox, 600, 400);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
 }
