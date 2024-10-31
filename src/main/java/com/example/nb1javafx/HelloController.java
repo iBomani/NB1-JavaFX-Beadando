@@ -1316,12 +1316,12 @@ public class HelloController {
     }
 
     @FXML
-    public void pozicionyitasItem(ActionEvent actionEvent){
-        Stage primaryStage= new Stage();
+    public void pozicionyitasItem(ActionEvent actionEvent) {
+        Stage primaryStage = new Stage();
         primaryStage.setTitle("Pozíció Nyitás");
 
-
         Text welcomeText = new Text("Pozíció Nyitás");
+        welcomeText.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         ComboBox<String> currencyPairComboBox = new ComboBox<>();
         currencyPairComboBox.getItems().addAll("AUD_USD", "EUR_USD", "GBP_USD");
@@ -1334,15 +1334,20 @@ public class HelloController {
         Button buyButton = new Button("Vétel");
         Button sellButton = new Button("Eladás");
 
+        buyButton.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 14px;");
+        sellButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 14px;");
+
+        Text resultText = new Text();
+        resultText.setStyle("-fx-font-size: 14px; -fx-fill: blue;");
 
         buyButton.setOnAction(event -> {
             String selectedPair = currencyPairComboBox.getValue();
             Integer selectedQuantity = quantityComboBox.getValue();
             if (selectedPair != null && selectedQuantity != null) {
                 String result = oandaController.Nyitás(selectedPair, selectedQuantity, true);
-                welcomeText.setText(welcomeText.getText() + "\n" + result);
+                resultText.setText(result);
             } else {
-                welcomeText.setText("Kérjük, válasszon ki mindent!");
+                resultText.setText("Kérjük, válasszon ki mindent!");
             }
         });
 
@@ -1351,47 +1356,52 @@ public class HelloController {
             Integer selectedQuantity = quantityComboBox.getValue();
             if (selectedPair != null && selectedQuantity != null) {
                 String result = oandaController.Nyitás(selectedPair, selectedQuantity, false);
-                welcomeText.setText(welcomeText.getText() + "\n" + result);
+                resultText.setText(result);
             } else {
-                welcomeText.setText("Kérjük, válasszon ki mindent!");
+                resultText.setText("Kérjük, válasszon ki mindent!");
             }
         });
 
-
-        VBox vbox = new VBox(10, welcomeText, currencyPairComboBox, quantityComboBox, buyButton, sellButton);
+        VBox vbox = new VBox(10, welcomeText, currencyPairComboBox, quantityComboBox, buyButton, sellButton, resultText);
         vbox.setPadding(new javafx.geometry.Insets(15));
+        vbox.setAlignment(Pos.CENTER);
 
-        Scene scene = new Scene(vbox, 300, 200);
+        Scene scene = new Scene(vbox, 400, 300);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
     @FXML
-    public void poziciozarasItem(ActionEvent actionEvent){
-        Stage primaryStage= new Stage();
+    public void poziciozarasItem(ActionEvent actionEvent) {
+        Stage primaryStage = new Stage();
         primaryStage.setTitle("Pozíció Zárás");
 
-
         Text welcomeText = new Text("Pozíció Zárás");
+        welcomeText.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         TextField tradeIdField = new TextField();
         tradeIdField.setPromptText("Írd be a pozíció ID-ját");
 
         Button closeButton = new Button("Pozíció Zárás");
+        closeButton.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-size: 14px;");
 
+        Text resultText = new Text();
+        resultText.setStyle("-fx-font-size: 14px; -fx-fill: blue;");
 
         closeButton.setOnAction(event -> {
             String tradeId = tradeIdField.getText();
             if (tradeId != null && !tradeId.trim().isEmpty()) {
                 System.out.println(tradeId);
-                oandaController.Zaras(tradeId);
+                String result = oandaController.Zaras(tradeId);
+                resultText.setText(result);
+                tradeIdField.clear();
             } else {
-                welcomeText.setText("Kérjük, írd be a pozíció ID-ját!");
+                resultText.setText("Kérjük, írd be a pozíció ID-ját!");
             }
         });
 
-
-        VBox vbox = new VBox(10, welcomeText, tradeIdField, closeButton);
+        VBox vbox = new VBox(10, welcomeText, tradeIdField, closeButton, resultText);
         vbox.setPadding(new javafx.geometry.Insets(15));
+        vbox.setAlignment(Pos.CENTER);
 
         Scene scene = new Scene(vbox, 300, 200);
         primaryStage.setScene(scene);
