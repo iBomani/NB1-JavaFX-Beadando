@@ -4,6 +4,7 @@ import com.oanda.v20.*;
 import com.oanda.v20.account.AccountID;
 import com.oanda.v20.instrument.Candlestick;
 import com.oanda.v20.instrument.InstrumentCandlesResponse;
+import com.oanda.v20.pricing.PricingGetResponse;
 import com.oanda.v20.trade.Trade;
 import csomag1.MNBArfolyamServiceSoapGetCurrenciesStringFaultFaultMessage;
 import csomag1.MNBArfolyamServiceSoapGetInfoStringFaultFaultMessage;
@@ -26,6 +27,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -34,6 +36,8 @@ import com.oanda.v20.account.AccountSummary;
 import java.io.*;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javafx.scene.text.Font;
@@ -1134,16 +1138,71 @@ public class HelloController {
         newWindow.show();
     }
     @FXML
-    public void aktualisarakItem(ActionEvent actionEvent){
+    public void aktualisarakItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
-        BorderPane root = new BorderPane();
-
-
         final oandaController oc = new oandaController();
-        Label label = new Label();
-        label.setText(oc.aktualisarak());
-        VBox vBox = new VBox(label);
-        Scene scene = new Scene(vBox, 600, 400);
+
+        ComboBox<String> currencyComboBox = new ComboBox<>();
+        currencyComboBox.getItems().addAll("EUR_USD", "USD_JPY", "GBP_USD", "USD_CHF");
+        currencyComboBox.setPromptText("Válassz devizapárt!");
+        currencyComboBox.setStyle("-fx-font-size: 14px; -fx-padding: 5px;");
+
+        Label instrumentLabel = new Label("Devizapár: -");
+        Label timeLabel = new Label("Dátum: -");
+        Label highestBidLabel = new Label("Legmagasabb ajánlat: -");
+        Label lowestAskLabel = new Label("Legalacsonyabb kérés: -");
+        Label closeoutBidLabel = new Label("Záró ajánlat: -");
+        Label closeoutAskLabel = new Label("Záró kérés: -");
+
+        Label[] labels = {instrumentLabel, timeLabel, highestBidLabel, lowestAskLabel, closeoutBidLabel, closeoutAskLabel};
+        for (Label label : labels) {
+            label.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
+        }
+
+        currencyComboBox.setOnAction(event -> {
+            String selectedCurrency = currencyComboBox.getValue();
+            if (selectedCurrency != null) {
+                instrumentLabel.setText("Devizapár: " + selectedCurrency);
+
+                PricingGetResponse resp = oc.aktualisarak(selectedCurrency);
+                if (resp != null) {
+                    OffsetDateTime dateTime = OffsetDateTime.parse(resp.getTime());
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String formattedTime = dateTime.format(formatter);
+                    timeLabel.setText("Dátum: " + formattedTime);
+                    highestBidLabel.setText("Legmagasabb ajánlat: " + resp.getPrices().get(0).getBids().get(0).getPrice());
+                    lowestAskLabel.setText("Legalacsonyabb kérés: " + resp.getPrices().get(0).getAsks().get(0).getPrice());
+                    closeoutBidLabel.setText("Záró ajánlat: " + resp.getPrices().get(0).getCloseoutBid());
+                    closeoutAskLabel.setText("Záró kérés: " + resp.getPrices().get(0).getCloseoutAsk());
+                }
+            }
+        });
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setStyle("-fx-padding: 20px; -fx-background-color: #f0f0f0; -fx-border-color: #dddddd; -fx-border-radius: 8; -fx-background-radius: 8;");
+        grid.setAlignment(Pos.CENTER);
+
+        grid.add(new Label("Válassz devizapárt:"), 0, 0);
+        grid.add(currencyComboBox, 1, 0);
+        grid.add(instrumentLabel, 0, 1, 2, 1);
+        grid.add(timeLabel, 0, 2, 2, 1);
+        grid.add(highestBidLabel, 0, 3);
+        grid.add(lowestAskLabel, 1, 3);
+        grid.add(closeoutBidLabel, 0, 4);
+        grid.add(closeoutAskLabel, 1, 4);
+
+        /*
+        currencyComboBox.setTooltip(new Tooltip("Válassz egy devizapárt az aktuális árak megtekintéséhez"));
+        highestBidLabel.setTooltip(new Tooltip("A jelenleg elérhető legmagasabb ajánlati ár"));
+        lowestAskLabel.setTooltip(new Tooltip("A jelenleg elérhető legalacsonyabb kérési ár"));
+        closeoutBidLabel.setTooltip(new Tooltip("Az ajánlati pozíció lezárásának ára"));
+        closeoutAskLabel.setTooltip(new Tooltip("A kérési pozíció lezárásának ára"));
+        */
+
+        BorderPane root = new BorderPane(grid);
+        Scene scene = new Scene(root, 500, 350);
         newWindow.setTitle("4. feladat - Aktuálisárak");
         newWindow.setScene(scene);
         newWindow.show();
@@ -1323,8 +1382,8 @@ public class HelloController {
         closeButton.setOnAction(event -> {
             String tradeId = tradeIdField.getText();
             if (tradeId != null && !tradeId.trim().isEmpty()) {
-                String result = oandaController.Zaras(tradeId);
-                welcomeText.setText(welcomeText.getText() + "\n" + result);
+                System.out.println(tradeId);
+                oandaController.Zaras(tradeId);
             } else {
                 welcomeText.setText("Kérjük, írd be a pozíció ID-ját!");
             }

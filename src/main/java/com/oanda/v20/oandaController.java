@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -48,8 +49,9 @@ public class oandaController {
 
         return null;
     }
-    public String aktualisarak() {
+    public PricingGetResponse aktualisarak(String selectedCurrency) {
         StringBuilder pricesString = new StringBuilder();
+        PricingGetResponse resp = null;
         try {
             Context ctx = new ContextBuilder("https://api-fxpractice.oanda.com")
                     .setToken("0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b")
@@ -57,20 +59,19 @@ public class oandaController {
                     .build();
 
             AccountID accountId = new AccountID("101-004-30186452-001");
-            List<String> instruments = new ArrayList<>(Arrays.asList("EUR_USD", "USD_JPY", "GBP_USD", "USD_CHF"));
+            List<String> instruments = Collections.singletonList(selectedCurrency);
 
             PricingGetRequest request = new PricingGetRequest(accountId, instruments);
-            PricingGetResponse resp = ctx.pricing.get(request);
+            resp = ctx.pricing.get(request);
 
             for (ClientPrice price : resp.getPrices()) {
                 pricesString.append(price.toString()).append("\n");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error: " + e.getMessage();
         }
 
-        return pricesString.toString();
+        return resp;
     }
 
     public InstrumentCandlesResponse historikusArak(String instrument, String fromDate, String toDate) {
@@ -125,6 +126,7 @@ public class oandaController {
                     ContextBuilder("https://api-fxpractice.oanda.com").setToken("0d5dc4b6290d7e4c79231934a2515051-1c59ba0673c3875fb4d43ae855b70d4b").setApplication("StepByStepOrder").build();
 
             AccountID accountId = new AccountID("101-004-30186452-001");
+
             ctx.trade.close(new TradeCloseRequest(accountId, new TradeSpecifier(tradeId)));
             resultMessage = "Trade ID: " + tradeId + " sikeresen lezárva.";
         } catch (Exception e) {
