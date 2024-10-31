@@ -904,6 +904,7 @@ public class HelloController {
 
         NumberAxis yAxis = new NumberAxis(minRate - 1, maxRate + 1, 0.2);
         yAxis.setLabel("Árfolyam");
+
         LineChart<String, Number> lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setTitle("Árfolyam grafikon");
 
@@ -911,9 +912,13 @@ public class HelloController {
         series.setName("Árfolyam");
 
 
-        dictionary.keys().asIterator().forEachRemaining(date -> {
+        List<String> dates = Collections.list(dictionary.keys());
+        Collections.sort(dates);
+
+
+        for (String date : dates) {
             series.getData().add(new XYChart.Data<>(date, dictionary.get(date)));
-        });
+        }
 
         lineChart.getData().add(series);
 
@@ -1147,15 +1152,14 @@ public class HelloController {
     public void historikusarakItem(ActionEvent actionEvent) {
         Stage newWindow = new Stage();
 
-        // VBox with spacing and padding
+
         VBox vBox = new VBox(15);
         vBox.setPadding(new Insets(20));
         vBox.setAlignment(Pos.CENTER);
 
-        // Set up input fields with prompt texts
         TextField instrumentField = new TextField("EUR_USD");
         instrumentField.setPromptText("Devizák (pl.: EUR_USD)");
-        instrumentField.setMaxWidth(200);  // Setting width for neat alignment
+        instrumentField.setMaxWidth(200);
 
         DatePicker fromDatePicker = new DatePicker();
         fromDatePicker.setPromptText("Mettől");
@@ -1165,15 +1169,14 @@ public class HelloController {
         toDatePicker.setPromptText("Meddig");
         toDatePicker.setMaxWidth(150);
 
-        // Create a button with styling
         Button showGraph = new Button("Grafikon megjelenítése");
         showGraph.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px;");
         showGraph.setOnAction(e -> showCandlestickChart(new oandaController(), instrumentField, fromDatePicker, toDatePicker));
 
-        // Add all elements to the layout
+
         vBox.getChildren().addAll(instrumentField, fromDatePicker, toDatePicker, showGraph);
 
-        // Scene and stage setup
+
         Scene scene = new Scene(vBox, 400, 300);
         newWindow.setTitle("3. feladat - Historikus árak");
         newWindow.setScene(scene);
@@ -1184,7 +1187,7 @@ public class HelloController {
 
         InstrumentCandlesResponse resp = oc.historikusArak(instrumentField.getText(), String.valueOf(fromDatePicker.getValue()), String.valueOf(toDatePicker.getValue()));
 
-        // Check for valid data
+
         if (resp == null || resp.getCandles() == null || resp.getCandles().isEmpty()) {
             System.out.println("No data available to display.");
             return;
