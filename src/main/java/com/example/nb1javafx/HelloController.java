@@ -397,7 +397,6 @@ public class HelloController {
         VBox formLayout = new VBox(10);
         formLayout.setPadding(new Insets(20));
 
-
         TextField mezszamField = new TextField();
         mezszamField.setPromptText("Mezszám");
 
@@ -413,6 +412,20 @@ public class HelloController {
         CheckBox magyarCheckBox = new CheckBox("Magyar");
         CheckBox kulfoldiCheckBox = new CheckBox("Külföldi");
 
+
+        magyarCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                kulfoldiCheckBox.setSelected(false);
+            }
+        });
+
+
+        kulfoldiCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                magyarCheckBox.setSelected(false);
+            }
+        });
+
         TextField ertekField = new TextField();
         ertekField.setPromptText("Érték");
 
@@ -424,7 +437,6 @@ public class HelloController {
 
         Button submitButton = new Button("Hozzáadás");
 
-
         formLayout.getChildren().addAll(
                 new Label("Új Labdarugó hozzáadása:"),
                 mezszamField, utonevField, vezeteknevField,
@@ -433,7 +445,6 @@ public class HelloController {
         );
 
         root.setCenter(formLayout);
-
 
         submitButton.setOnAction(event -> {
             int mezszam = Integer.parseInt(mezszamField.getText());
@@ -446,9 +457,7 @@ public class HelloController {
             int klubid = Integer.parseInt(klubidField.getText());
             int posztid = Integer.parseInt(posztidField.getText());
 
-
             insertLabdarugoToDatabase(mezszam, utonev, vezeteknev, szulido, magyar, kulfoldi, ertek, klubid, posztid);
-
 
             mezszamField.clear();
             utonevField.clear();
@@ -465,6 +474,7 @@ public class HelloController {
         newWindow.setScene(scene);
         newWindow.show();
     }
+
 
     private void insertLabdarugoToDatabase(int mezszam, String utonev, String vezeteknev, String szulido,
                                            boolean magyar, boolean kulfoldi, int ertek, int klubid, int posztid) {
