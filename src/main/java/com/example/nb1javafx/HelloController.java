@@ -510,13 +510,10 @@ public class HelloController {
         VBox formLayout = new VBox(10);
         formLayout.setPadding(new Insets(20));
 
-
         ComboBox<Integer> idComboBox = new ComboBox<>();
         idComboBox.setPromptText("Válasszon azonosítót");
 
-
         populateIdComboBox(idComboBox);
-
 
         TextField mezszamField = new TextField();
         mezszamField.setPromptText("Mezszám");
@@ -545,11 +542,22 @@ public class HelloController {
         Button submitButton = new Button("Módosítás");
 
 
+        magyarCheckBox.setOnAction(event -> {
+            if (magyarCheckBox.isSelected()) {
+                kulfoldiCheckBox.setSelected(false);
+            }
+        });
+
+        kulfoldiCheckBox.setOnAction(event -> {
+            if (kulfoldiCheckBox.isSelected()) {
+                magyarCheckBox.setSelected(false);
+            }
+        });
+
         idComboBox.setOnAction(event -> {
             int selectedId = idComboBox.getValue();
             loadRecordDetails(selectedId, mezszamField, utonevField, vezeteknevField, szulidoField, magyarCheckBox, kulfoldiCheckBox, ertekField, klubidField, posztidField);
         });
-
 
         formLayout.getChildren().addAll(
                 new Label("Rekord módosítása:"),
@@ -559,7 +567,6 @@ public class HelloController {
         );
 
         root.setCenter(formLayout);
-
 
         submitButton.setOnAction(event -> {
             int id = idComboBox.getValue();
@@ -580,6 +587,7 @@ public class HelloController {
         newWindow.setScene(scene);
         newWindow.show();
     }
+
 
     public void populateIdComboBox(ComboBox<Integer> comboBox) {
         comboBox.getItems().clear();
