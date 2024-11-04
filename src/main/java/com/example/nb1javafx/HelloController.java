@@ -355,7 +355,7 @@ public class HelloController {
             sql.append(" AND l.szulido > DATE('now', '-25 years')");
         }
 
-        System.out.println("SQL: " + sql.toString());
+        //System.out.println("SQL: " + sql.toString());
 
         try (Connection conn = DatabaseConnection.connect();
              Statement stmt = conn.createStatement();
@@ -1463,7 +1463,7 @@ public class HelloController {
         TableColumn<Trade, Number> priceColumn = new TableColumn<>("Ár");
         TableColumn<Trade, Number> unrealizedPLColumn = new TableColumn<>("Nyereség/veszteség");
 
-        // CellValueFactory beállítása
+
         idColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getId())));
 
         instrumentColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getInstrument().toString()));
@@ -1473,7 +1473,7 @@ public class HelloController {
         unrealizedPLColumn.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getUnrealizedPL().doubleValue()));
 
 
-        // Oszlopok hozzáadása
+
         tradesTable.getColumns().addAll(idColumn, instrumentColumn, openTimeColumn, unitsColumn, priceColumn, unrealizedPLColumn);
 
         Button refreshButton = new Button("Nyitott pozíciók frissítése");
